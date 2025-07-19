@@ -27,7 +27,7 @@ namespace H2_H3_Converter_UI
             public int WeapIndex2 { get; set; }
             public int VehiIndex { get; set; }
             public int SeatType { get; set; }
-            public int Grenade {  get; set; }
+            public int Grenade { get; set; }
             public int Swarm { get; set; }
             public string ActorVar { get; set; }
             public string VehiVar { get; set; }
@@ -42,14 +42,14 @@ namespace H2_H3_Converter_UI
             public uint Flags { get; set; }
             public int Team { get; set; }
             public int ParentIndex { get; set; }
-            public int NormalDiff {  get; set; }
+            public int NormalDiff { get; set; }
             public int InsaneDiff { get; set; }
-            public int Upgrade {  get; set; }
+            public int Upgrade { get; set; }
             public int VehiIndex { get; set; }
             public int CharIndex { get; set; }
             public int WeapIndex { get; set; }
             public int WeapIndex2 { get; set; }
-            public int Zone {  get; set; }
+            public int Zone { get; set; }
             public int Grenade { get; set; }
             public string VehiVariant { get; set; }
             public string PlaceScript { get; set; }
@@ -133,7 +133,7 @@ namespace H2_H3_Converter_UI
             }
         }
 
-        public static void ConvertSquads(string scenPath, Loading loadingForm, XmlDocument scenfile, bool useSquadFolders)
+        public static void ConvertSquads(string scenPath, Loading loadingForm, XmlDocument scenfile, string squadFoldersTxt)
         {
             loadingForm.UpdateOutputBox("Begin reading scenario squads from XML...", false);
 
@@ -171,12 +171,12 @@ namespace H2_H3_Converter_UI
 
             if (squadsBlock.Count > 0)
             {
-                if (useSquadFolders)
+                if (squadFoldersTxt != "")
                 {
                     // Grab user-specified folder names for squads
                     try
                     {
-                        squadFolderNames = File.ReadAllLines("squad_folders_CHANGME.txt");
+                        squadFolderNames = File.ReadAllLines(squadFoldersTxt);
                         loadingForm.UpdateOutputBox("Using user-specified squad folders.", false);
                     }
                     catch (FileNotFoundException)
@@ -239,13 +239,12 @@ namespace H2_H3_Converter_UI
                         if (squadFolderNames != null)
                         {
                             bool foundFolder = false;
-                            for (int x = 0; x < squadFolderNames.Length; x++)
+                            foreach (string line in squadFolderNames.OrderByDescending(s => s.Length))
                             {
-                                string line = squadFolderNames[x];
-                                if (squad.Name.ToLower().Contains(line.ToLower()))
+                                if (squad.Name.StartsWith(line, StringComparison.OrdinalIgnoreCase))
                                 {
-                                    loadingForm.UpdateOutputBox($"Squad {squad.Name} using editor folder index {x} ({line}).", false);
-                                    squad.EditorFolder = x;
+                                    loadingForm.UpdateOutputBox($"Squad {squad.Name} using editor folder {line}.", false);
+                                    squad.EditorFolder = Array.IndexOf(squadFolderNames, line);
                                     foundFolder = true;
                                     break;
                                 }
@@ -323,7 +322,7 @@ namespace H2_H3_Converter_UI
                         {
                             loadingForm.UpdateOutputBox($"Squad {squad.Name} has no starting locations.", false);
                         }
-                        
+
                         squad.StartingLocations = startLocs;
                         allSquads.Add(squad);
                         i++;
@@ -339,7 +338,7 @@ namespace H2_H3_Converter_UI
             {
                 loadingForm.UpdateOutputBox("No squad data!", false);
             }
-            
+
 
             // Now time to write all that data with MB!
             string h3ek_path = scenPath.Substring(0, scenPath.IndexOf("H3EK") + "H3EK".Length);
