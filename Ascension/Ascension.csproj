@@ -1,33 +1,27 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>net48</TargetFramework>
+    <TargetFramework>net10.0-windows</TargetFramework>
     <OutputType>WinExe</OutputType>
-    <ApplicationIcon>ascension_128.ico</ApplicationIcon>
+    <ApplicationIcon>Ascension.ico</ApplicationIcon>
     <AssemblyName>Ascension</AssemblyName>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <HighEntropyVA>false</HighEntropyVA>
+    <BaseAddress>0x40000</BaseAddress>
     <UseWindowsForms>true</UseWindowsForms>
     <ImportWindowsDesktopTargets>true</ImportWindowsDesktopTargets>
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
     <AppendRuntimeIdentifierToOutputPath>false</AppendRuntimeIdentifierToOutputPath>
     <RuntimeIdentifiers>win-x64</RuntimeIdentifiers>
     <Platforms>x64</Platforms>
-    <Configuration>Release</Configuration> <!--Default value-->
-    <Platform>x64</Platform> <!--Default value-->
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="D:\SteamLibrary\steamapps\common\H3EK\bin\ManagedBlam.dll" />
   </ItemGroup>
   <ItemGroup>
-    <Reference Include="System.Data.DataSetExtensions" />
-    <Reference Include="Microsoft.CSharp" />
-  </ItemGroup>
-  <ItemGroup>
-    <PackageReference Include="Magick.NET-Q16-x64" Version="14.9.1" />
-    <PackageReference Include="Magick.NET.Core" Version="14.9.1" />
-  </ItemGroup>  
-  <ItemGroup>
-    <Content Include="ascension_128.ico" />
-    <Content Include="h2_h3.ico" />
-  </ItemGroup>
+    <PackageReference Include="Magick.NET-Q16-x64" Version="14.10.2" />
+    <PackageReference Include="Magick.NET.Core" Version="14.10.2" />
+  </ItemGroup> 
+  <Target Name="PostBuild" AfterTargets="Build">
+  	<Exec Command="call &quot;$(DevEnvDir)..\Tools\VsDevCmd.bat&quot; &amp;&amp; editbin /HIGHENTROPYVA:NO /DYNAMICBASE:NO /REBASE:base=0x10000 &quot;$(TargetDir)$(TargetName).exe&quot;" />
+  </Target>
 </Project>

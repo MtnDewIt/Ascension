@@ -8,7 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
-namespace H2_H3_Converter_UI
+namespace Ascension
 {
     public partial class ObjectCreatorHelp : Form
     {

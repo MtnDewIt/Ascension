@@ -12,9 +12,9 @@ using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace H2_H3_Converter_UI
+namespace Ascension
 {
-    internal class ObjectPorter
+    public class ObjectPorter
     {
         public static string[] GetTagsForModel(TagPath objectTagPath, string h2ekPath, string h3ekPath, string h2RelativeObjectTagFolder, Loading loadingForm)
         {

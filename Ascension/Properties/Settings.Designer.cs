@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace H2_H3_Converter_UI.Properties
+namespace Ascension.Properties
 {
 
 

@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Windows.Forms;
 
-namespace H2_H3_Converter_UI
+namespace Ascension
 {
     internal static class Program
     {

@@ -7,19 +7,19 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Xml;
 
-namespace H2_H3_Converter_UI
+namespace Ascension
 {
     public partial class form1 : Form
     {
-        List<string> bsp_paths = new List<string>();
-        string scen_path = "";
-        string h2_xml_path = "";
-        string squad_folder_txt_path = "";
-        bool use_existing_tifs = false;
-        bool bsps_valid = false;
-        bool h3_valid = false;
-        bool h2_valid = false;
-        bool create_object_tags = false;
+        private List<string> bsp_paths = new List<string>();
+        private string scen_path = "";
+        private string h2_xml_path = "";
+        private string squad_folder_txt_path = "";
+        private bool use_existing_tifs = false;
+        private bool bsps_valid = false;
+        private bool h3_valid = false;
+        private bool h2_valid = false;
+        private bool create_object_tags = false;
 
         public form1()
         {

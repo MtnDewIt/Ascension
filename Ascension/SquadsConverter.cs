@@ -6,17 +6,17 @@ using System.IO;
 using System.Linq;
 using System.Xml;
 
-namespace H2_H3_Converter_UI
+namespace Ascension
 {
     public class SquadsConverter
     {
-        class SquadGroup
+        public class SquadGroup
         {
             public string Name { get; set; }
             public int ParentIndex { get; set; }
         }
 
-        class StartLoc
+        public class StartLoc
         {
             public string Name { get; set; }
             public float[] Position { get; set; }
@@ -36,7 +36,7 @@ namespace H2_H3_Converter_UI
             public string PlaceScript { get; set; }
         }
 
-        class Squad
+        public class Squad
         {
             public string Name { get; set; }
             public uint Flags { get; set; }

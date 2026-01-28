@@ -6,16 +6,16 @@ using System.IO;
 using System.Linq;
 using System.Xml;
 
-namespace H2_H3_Converter_UI
+namespace Ascension
 {
-    class PointElement
+    public class PointElement
     {
         public string Name { get; set; }
         public float[] Position { get; set; }
         public float[] Facing { get; set; }
     }
 
-    class PointSet
+    public class PointSet
     {
         public string SetName { get; set; }
         public int BspIndex { get; set; }

@@ -11,9 +11,9 @@ using System.Collections.Generic;
 using Bungie.Game;
 using System.Text;
 
-namespace H2_H3_Converter_UI
+namespace Ascension
 {
-    class Shader
+    public class Shader
     {
         public string Name { get; set; }
         public string GlobMat { get; set; }
@@ -27,7 +27,7 @@ namespace H2_H3_Converter_UI
         public string EnvBitmap { get; set; }
     }
 
-    class Parameter
+    public class Parameter
     {
         public string Name { get; set; }
         public string Type { get; set; }
@@ -41,7 +41,7 @@ namespace H2_H3_Converter_UI
         public byte[] ScaleY { get; set; }
     }
 
-    class BitmapData
+    public class BitmapData
     {
         public string Bitmap { get; set; }
         public string Type { get; set; }
@@ -50,7 +50,7 @@ namespace H2_H3_Converter_UI
         public string BumpHeight { get; set; }
     }
 
-    class CookSettings
+    public class CookSettings
     {
         public float SpecCoeff { get; set; }
         public float Roughness { get; set; }
@@ -212,7 +212,7 @@ namespace H2_H3_Converter_UI
             loadingForm.UpdateOutputBox("\nFinished converting shaders!", false);
         }
 
-        static bool IsXmlChar(char ch)
+        private static bool IsXmlChar(char ch)
         {
             // Check if the character is a valid XML character
             return ch == 0x9 || ch == 0xA || ch == 0xD ||
@@ -221,7 +221,7 @@ namespace H2_H3_Converter_UI
                (ch >= 0x10000 && ch <= 0x10FFFF);
         }
 
-        static string RemoveInvalidXmlCharacters(string input)
+        private static string RemoveInvalidXmlCharacters(string input)
         {
             // Replace invalid characters with an empty string
             StringBuilder cleanedString = new StringBuilder();
@@ -236,7 +236,7 @@ namespace H2_H3_Converter_UI
             return cleanedString.ToString();
         }
 
-        static string CleanXML(string filePath, Loading loadingForm)
+        private static string CleanXML(string filePath, Loading loadingForm)
         {
             try
             {
@@ -257,7 +257,7 @@ namespace H2_H3_Converter_UI
             }
         }
 
-        static List<string> GetShaders(string bspPath, Loading loadingForm)
+        private static List<string> GetShaders(string bspPath, Loading loadingForm)
         {
             loadingForm.UpdateOutputBox("Parsing XML for " + bspPath, false);
 
@@ -305,7 +305,7 @@ namespace H2_H3_Converter_UI
             }
         }
 
-        static void ShaderExtractor(List<string> shaderPaths, string h2ekPath, string xmlOutputPath, Loading loadingForm)
+        private static void ShaderExtractor(List<string> shaderPaths, string h2ekPath, string xmlOutputPath, Loading loadingForm)
         {
             string toolExePath = h2ekPath + @"\tool.exe";
 
@@ -315,7 +315,7 @@ namespace H2_H3_Converter_UI
             }
         }
 
-        static List<Shader> GetShaderData(string xmlOutputPath)
+        private static List<Shader> GetShaderData(string xmlOutputPath)
         {
             List<Shader> allShaderData = new List<Shader>();
             string[] xmlFiles = Directory.GetFiles(xmlOutputPath, "*.xml");
@@ -489,7 +489,7 @@ namespace H2_H3_Converter_UI
             return allShaderData;
         }
 
-        static void ExtractBitmaps(List<string> allBitmapRefs, string h2ekPath, string tgaOutputPath, Loading loadingForm)
+        private static void ExtractBitmaps(List<string> allBitmapRefs, string h2ekPath, string tgaOutputPath, Loading loadingForm)
         {
             string toolExePath = h2ekPath + @"\tool.exe";
 
@@ -531,7 +531,7 @@ namespace H2_H3_Converter_UI
             });
         }
 
-        static string[] TGAToTIF(string tgaOutputPath, string bitmapsDir, string h3ekPath, Loading loadingForm)
+        private static string[] TGAToTIF(string tgaOutputPath, string bitmapsDir, string h3ekPath, Loading loadingForm)
         {
             List<string> errorFiles = new List<string>();
             string[] tgaFiles = Directory.GetFiles(tgaOutputPath, "*.tga");
@@ -684,7 +684,7 @@ namespace H2_H3_Converter_UI
             return errorFiles.ToArray();
         }
 
-        static void AddShaderScaleFunc(TagFile tagFile, int type, int index, byte byte1, byte byte2, int animIndex)
+        private static void AddShaderScaleFunc(TagFile tagFile, int type, int index, byte byte1, byte byte2, int animIndex)
         {
             // Add scale element
             ((TagFieldBlock)tagFile.SelectField($"Struct:render_method[0]/Block:parameters[{index}]/Block:animated parameters")).AddElement();
@@ -700,7 +700,7 @@ namespace H2_H3_Converter_UI
             funcData.SetData(dataArray);
         }
 
-        static void MakeShaderTags(List<Shader> allShaderData, string bitmapsDir, string h3ekPath, Loading loadingForm)
+        private static void MakeShaderTags(List<Shader> allShaderData, string bitmapsDir, string h3ekPath, Loading loadingForm)
         {
             string bitmapTagsDir = bitmapsDir.Replace("data", "tags").Split(new[] { "\\tags\\" }, StringSplitOptions.None).LastOrDefault();
             string shadersDir = (bitmapsDir.Split(new[] { "\\data\\" }, StringSplitOptions.None).LastOrDefault()).Replace("bitmaps", "shaders");

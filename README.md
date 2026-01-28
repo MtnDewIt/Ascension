@@ -1,4 +1,4 @@
-<div align="center"> <img src="H2_H3_Converter_UI/ascension_github_banner.png"> </div>
+<div align="center"> <img src="Docs/ascension_github_banner.png"> </div>
 
 # Ascension
 Ascension is a C# [ManagedBlam](https://c20.reclaimers.net/general/mod-tools/managed-blam/)-based program for converting H2 scenario and shader data into H3 format. 

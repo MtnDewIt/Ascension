@@ -1,4 +1,4 @@
-﻿namespace H2_H3_Converter_UI
+﻿namespace Ascension
 {
     partial class Info
     {

@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Xml;
 
-namespace H2_H3_Converter_UI
+namespace Ascension
 {
     public class FlightHint
     {

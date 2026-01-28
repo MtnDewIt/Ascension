@@ -7,9 +7,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace H2_H3_Converter_UI
+namespace Ascension
 {
-    internal class ToolRunner
+    public class ToolRunner
     {
         // Overloads
         public static void RunTool(string toolExePath, string command, string editingKitPath, string filePath, Loading loadingForm, string outputPath, string type)

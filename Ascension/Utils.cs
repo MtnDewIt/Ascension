@@ -6,7 +6,7 @@ using System.IO;
 using System.Linq;
 using System.Xml;
 
-namespace H2_H3_Converter_UI
+namespace Ascension
 {
     public class Utils
     {

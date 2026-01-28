@@ -8,13 +8,15 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
-namespace H2_H3_Converter_UI
+namespace Ascension
 {
-    public partial class SquadFolderHelp : Form
+    public partial class Info : Form
     {
-        public SquadFolderHelp()
+        public Info()
         {
             InitializeComponent();
+            textBox1.SelectionStart = 9999;
+            textBox1.SelectionLength = 0;
         }
     }
 }
