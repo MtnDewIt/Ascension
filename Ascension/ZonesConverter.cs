@@ -16,7 +16,7 @@ namespace Ascension
         public int RefFrame { get; set; }
     }
 
-    public class Fpos
+    public class FiringPosition
     {
         public float[] Position { get; set; }
         public int AreaRef { get; set; }
@@ -29,7 +29,7 @@ namespace Ascension
         public uint Flags { get; set; }
         public int BspIndex { get; set; }
         public List<Area> Areas { get; set; } = new List<Area>();
-        public List<Fpos> Fpos { get; set; } = new List<Fpos>();
+        public List<FiringPosition> FiringPositions { get; set; } = new List<FiringPosition>();
     }
 
 
@@ -118,14 +118,14 @@ namespace Ascension
                     // Get all firing positions for zone
                     bool fposEnd = false;
                     int fposIndex = 0;
-                    List<Fpos> allFpos = new List<Fpos>();
+                    List<FiringPosition> allFpos = new List<FiringPosition>();
                     while (!fposEnd)
                     {
                         XmlNode fposElement = zonesBlock.SelectSingleNode("./element[@index='" + zoneIndex + "']/block[@name='firing positions']/element[@index='" + fposIndex + "']");
 
                         if (fposElement != null)
                         {
-                            Fpos fpos = new Fpos
+                            FiringPosition fpos = new FiringPosition
                             {
                                 Position = fposElement.SelectSingleNode("./field[@name='position (local)']").InnerText.Trim().Split(',').Select(float.Parse).ToArray(),
                                 AreaRef = int.Parse(fposElement.SelectSingleNode("./block_index[@type='area']").Attributes["index"]?.Value),
@@ -139,7 +139,7 @@ namespace Ascension
                         {
                             // End of firing positions for zone
                             fposEnd = true;
-                            zone.Fpos = allFpos;
+                            zone.FiringPositions = allFpos;
                         }
                     }
 
@@ -159,7 +159,7 @@ namespace Ascension
             return true;
         }
 
-        static void ZonesManagedBlam(List<Zone> allZones, string h3ekPath, string scenPath, Loading loadingForm)
+        private static void ZonesManagedBlam(List<Zone> allZones, string h3ekPath, string scenPath, Loading loadingForm)
         {
             var tagPath = TagPath.FromPathAndType(Path.ChangeExtension(scenPath.Split(new[] { "\\tags\\" }, StringSplitOptions.None).Last(), null).Replace('\\', Path.DirectorySeparatorChar), "scnr*");
             ManagedBlamSystem.InitializeProject(InitializationType.TagsOnly, h3ekPath);
@@ -167,59 +167,53 @@ namespace Ascension
             using (var tagFile = new TagFile(tagPath))
             {
                 // Clear all existing zone data
-                ((TagFieldBlock)tagFile.SelectField("Block:zones")).RemoveAllElements();
+                tagFile.SelectFieldType<TagFieldBlock>("Block:zones").RemoveAllElements();
 
                 // Add all zone entries
-                int zoneIndex = 0;
-                foreach (var zone in allZones)
+                for (int zoneIndex = 0; zoneIndex < allZones.Count; zoneIndex++) 
                 {
+                    Zone zone = allZones[zoneIndex];
+
                     loadingForm.UpdateOutputBox($"Writing data for zone {zone.ZoneName}", false);
-                    ((TagFieldBlock)tagFile.SelectField("Block:zones")).AddElement();
+                    tagFile.SelectFieldType<TagFieldBlock>("Block:zones").AddElement();
 
                     // Zone data
-                    ((TagFieldElementString)tagFile.SelectField($"Block:zones[{zoneIndex}]/String:name")).Data = zone.ZoneName;
-                    ((TagFieldFlags)tagFile.SelectField($"Block:zones[{zoneIndex}]/Flags:flags")).RawValue = zone.Flags;
-                    ((TagFieldBlockIndex)tagFile.SelectField($"Block:zones[{zoneIndex}]/ShortBlockIndex:manual bsp")).Value = zone.BspIndex;
+                    tagFile.SelectFieldType<TagFieldElementString>($"Block:zones[{zoneIndex}]/String:name").Data = zone.ZoneName;
+                    tagFile.SelectFieldType<TagFieldFlags>($"Block:zones[{zoneIndex}]/Flags:flags").RawValue = zone.Flags;
+                    tagFile.SelectFieldType<TagFieldBlockIndex>($"Block:zones[{zoneIndex}]/ShortBlockIndex:manual bsp").Value = zone.BspIndex;
 
-                    // Add all area entries
-                    int areaIndex = 0;
-                    foreach (Area area in zone.Areas)
+                    for (int areaIndex = 0; areaIndex < zone.Areas.Count; areaIndex++) 
                     {
+                        Area area = zone.Areas[areaIndex];
+
                         // Add new
-                        ((TagFieldBlock)tagFile.SelectField($"Block:zones[{zoneIndex}]/Block:areas")).AddElement();
+                        tagFile.SelectFieldType<TagFieldBlock>($"Block:zones[{zoneIndex}]/Block:areas").AddElement();
 
                         // Name
-                        ((TagFieldElementString)tagFile.SelectField($"Block:zones[{zoneIndex}]/Block:areas[{areaIndex}]/String:name")).Data = area.Name;
+                        tagFile.SelectFieldType<TagFieldElementString>($"Block:zones[{zoneIndex}]/Block:areas[{areaIndex}]/String:name").Data = area.Name;
 
                         // Flags
-                        ((TagFieldFlags)tagFile.SelectField($"Block:zones[{zoneIndex}]/Block:areas[{areaIndex}]/Flags:area flags")).RawValue = area.Flags;
+                        tagFile.SelectFieldType<TagFieldFlags>($"Block:zones[{zoneIndex}]/Block:areas[{areaIndex}]/Flags:area flags").RawValue = area.Flags;
 
                         // Reference Frame
-                        ((TagFieldBlockIndex)tagFile.SelectField($"Block:zones[{zoneIndex}]/Block:areas[{areaIndex}]/ShortBlockIndex:manual reference frame")).Value = area.RefFrame;
-
-                        areaIndex++;
+                        tagFile.SelectFieldType<TagFieldBlockIndex>($"Block:zones[{zoneIndex}]/Block:areas[{areaIndex}]/ShortBlockIndex:manual reference frame").Value = area.RefFrame;
                     }
 
-                    // Add all firing position entries
-                    int fposIndex = 0;
-                    foreach (Fpos fpos in zone.Fpos)
+                    for (int firingPositionIndex = 0; firingPositionIndex < zone.FiringPositions.Count; firingPositionIndex++) 
                     {
-                        // Add new
-                        ((TagFieldBlock)tagFile.SelectField($"Block:zones[{zoneIndex}]/Block:firing positions")).AddElement();
+                        FiringPosition firingPosition = zone.FiringPositions[firingPositionIndex];
+
+                        tagFile.SelectFieldType<TagFieldBlock>($"Block:zones[{zoneIndex}]/Block:firing positions").AddElement();
 
                         // XYZ Position
-                        ((TagFieldElementArraySingle)tagFile.SelectField($"Block:zones[{zoneIndex}]/Block:firing positions[{fposIndex}]/RealPoint3d:position (local)")).Data = fpos.Position;
+                        tagFile.SelectFieldType<TagFieldElementArraySingle>($"Block:zones[{zoneIndex}]/Block:firing positions[{firingPositionIndex}]/RealPoint3d:position (local)").Data = firingPosition.Position;
 
                         // Area Reference
-                        ((TagFieldBlockIndex)tagFile.SelectField($"Block:zones[{zoneIndex}]/Block:firing positions[{fposIndex}]/ShortBlockIndex:area")).Value = fpos.AreaRef;
+                        tagFile.SelectFieldType<TagFieldBlockIndex>($"Block:zones[{zoneIndex}]/Block:firing positions[{firingPositionIndex}]/ShortBlockIndex:area").Value = firingPosition.AreaRef;
 
                         // Normal Direction
-                        ((TagFieldElementArraySingle)tagFile.SelectField($"Block:zones[{zoneIndex}]/Block:firing positions[{fposIndex}]/RealEulerAngles2d:normal")).Data = fpos.NormalDirection;
-
-                        fposIndex++;
+                        tagFile.SelectFieldType<TagFieldElementArraySingle>($"Block:zones[{zoneIndex}]/Block:firing positions[{firingPositionIndex}]/RealEulerAngles2d:normal").Data = firingPosition.NormalDirection;
                     }
-
-                    zoneIndex++;
                 }
 
                 // Aaaaand save everything in one go

@@ -1,11 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Drawing;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Ascension
 {
@@ -47,7 +44,7 @@ namespace Ascension
             {
                 if (filePath == null)
                 {
-                    throw new ArgumentNullException("filePath", "Filepath cannot be null for extract tool command!");
+                    throw new ArgumentNullException(nameof(filePath), "Filepath cannot be null for extract tool command!");
                 }
 
                 argumentsList.Add(command);
@@ -153,10 +150,7 @@ namespace Ascension
             {
                 if (!string.IsNullOrEmpty(e.Data))
                 {
-                    if (loadingForm != null)
-                    {
-                        loadingForm.UpdateOutputBox(e.Data + Environment.NewLine, true);
-                    }   
+                    loadingForm?.UpdateOutputBox(e.Data + Environment.NewLine, true);   
                 }
             };
 
@@ -164,10 +158,7 @@ namespace Ascension
             {
                 if (!string.IsNullOrEmpty(e.Data))
                 {
-                    if (loadingForm != null)
-                    {
-                        loadingForm.UpdateOutputBox("Error: " + e.Data + Environment.NewLine, true);
-                    }   
+                    loadingForm?.UpdateOutputBox("Error: " + e.Data + Environment.NewLine, true);   
                 }
             };
 

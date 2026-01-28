@@ -47,7 +47,7 @@ namespace Ascension
                         PointSet set = new PointSet();
                         List<PointElement> allPointsForSet = new List<PointElement>();
                         set.SetName = setEntry.SelectSingleNode($".//field[@name='name']").InnerText.Trim();
-                        set.BspIndex = Int32.Parse(setEntry.SelectSingleNode($".//block_index[@name='short block index']").Attributes["index"]?.Value);
+                        set.BspIndex = int.Parse(setEntry.SelectSingleNode($".//block_index[@name='short block index']").Attributes["index"]?.Value);
                         XmlNode setPointsBlock = setEntry.SelectSingleNode($".//block[@name='points']");
 
                         // Loop over all points within current point set
@@ -98,29 +98,30 @@ namespace Ascension
                 loadingForm.UpdateOutputBox($"Successfully opened \"{relativeScenPath}\"", false);
 
                 // Make sure scripting data block exists
-                if (((TagFieldBlock)scenTag.SelectField($"Block:scripting data")).Elements.Count() == 0)
+                if (scenTag.SelectFieldType<TagFieldBlock>($"Block:scripting data").Elements.Count == 0)
                 {
-                    ((TagFieldBlock)scenTag.SelectField($"Block:scripting data")).AddElement();
+                    scenTag.SelectFieldType<TagFieldBlock>($"Block:scripting data").AddElement();
                 }
-                ((TagFieldBlock)scenTag.SelectField($"Block:scripting data[0]/Block:point sets")).RemoveAllElements();
+
+                scenTag.SelectFieldType<TagFieldBlock>($"Block:scripting data[0]/Block:point sets").RemoveAllElements();
 
                 i = 0;
                 foreach (PointSet pointSet in allPointSets)
                 {
                     loadingForm.UpdateOutputBox($"Writing data for point set {pointSet.SetName}", false);
-                    ((TagFieldBlock)scenTag.SelectField($"Block:scripting data[0]/Block:point sets")).AddElement();
-                    ((TagFieldElementString)scenTag.SelectField($"Block:scripting data[0]/Block:point sets[{i}]/String:name")).Data = pointSet.SetName;
-                    ((TagFieldBlockIndex)scenTag.SelectField($"Block:scripting data[0]/Block:point sets[{i}]/ShortBlockIndex:bsp index")).Value = pointSet.BspIndex;
+                    scenTag.SelectFieldType<TagFieldBlock>($"Block:scripting data[0]/Block:point sets").AddElement();
+                    scenTag.SelectFieldType<TagFieldElementString>($"Block:scripting data[0]/Block:point sets[{i}]/String:name").Data = pointSet.SetName;
+                    scenTag.SelectFieldType<TagFieldBlockIndex>($"Block:scripting data[0]/Block:point sets[{i}]/ShortBlockIndex:bsp index").Value = pointSet.BspIndex;
 
                     int j = 0;
                     foreach (PointElement point in pointSet.Elements)
                     {
-                        ((TagFieldBlock)scenTag.SelectField($"Block:scripting data[0]/Block:point sets[{i}]/Block:points")).AddElement();
-                        ((TagFieldElementString)scenTag.SelectField($"Block:scripting data[0]/Block:point sets[{i}]/Block:points[{j}]/String:name")).Data = point.Name;
-                        ((TagFieldElementArraySingle)scenTag.SelectField($"Block:scripting data[0]/Block:point sets[{i}]/Block:points[{j}]/RealPoint3d:position")).Data = point.Position;
-                        ((TagFieldElementArraySingle)scenTag.SelectField($"Block:scripting data[0]/Block:point sets[{i}]/Block:points[{j}]/RealEulerAngles2d:facing direction")).Data = point.Facing;
-                        ((TagFieldElementInteger)scenTag.SelectField($"Block:scripting data[0]/Block:point sets[{i}]/Block:points[{j}]/ShortInteger:bsp index")).Data = pointSet.BspIndex;
-                        ((TagFieldBlockIndex)scenTag.SelectField($"Block:scripting data[0]/Block:point sets[{i}]/Block:points[{j}]/ShortBlockIndex:structure bsp")).Value = pointSet.BspIndex;
+                        scenTag.SelectFieldType<TagFieldBlock>($"Block:scripting data[0]/Block:point sets[{i}]/Block:points").AddElement();
+                        scenTag.SelectFieldType<TagFieldElementString>($"Block:scripting data[0]/Block:point sets[{i}]/Block:points[{j}]/String:name").Data = point.Name;
+                        scenTag.SelectFieldType<TagFieldElementArraySingle>($"Block:scripting data[0]/Block:point sets[{i}]/Block:points[{j}]/RealPoint3d:position").Data = point.Position;
+                        scenTag.SelectFieldType<TagFieldElementArraySingle>($"Block:scripting data[0]/Block:point sets[{i}]/Block:points[{j}]/RealEulerAngles2d:facing direction").Data = point.Facing;
+                        scenTag.SelectFieldType<TagFieldElementInteger>($"Block:scripting data[0]/Block:point sets[{i}]/Block:points[{j}]/ShortInteger:bsp index").Data = pointSet.BspIndex;
+                        scenTag.SelectFieldType<TagFieldBlockIndex>($"Block:scripting data[0]/Block:point sets[{i}]/Block:points[{j}]/ShortBlockIndex:structure bsp").Value = pointSet.BspIndex;
                         j++;
                     }
 

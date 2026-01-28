@@ -1,15 +1,14 @@
-﻿using System;
-using Bungie;
-using System.IO;
-using System.Xml;
-using Bungie.Tags;
-using System.Linq;
-using ImageMagick;
-using System.Diagnostics;
-using System.Threading.Tasks;
-using System.Collections.Generic;
+﻿using Bungie;
 using Bungie.Game;
+using Bungie.Tags;
+using ImageMagick;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
+using System.Xml;
 
 namespace Ascension
 {

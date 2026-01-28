@@ -200,7 +200,7 @@ namespace Ascension
                     // Create .model and .device_machine tags if requested
                     if (createObjects)
                     {
-                        Utils.CreateObjectTags(h3ObjectPath, h3ekPath, h2ekPath, h2TagPath, loadingForm);
+                        CreateObjectTags(h3ObjectPath, h3ekPath, h2ekPath, h2TagPath, loadingForm);
                     }
                 }
             }
@@ -216,7 +216,7 @@ namespace Ascension
                     // Create .model and .device_control tags if requested
                     if (createObjects)
                     {
-                        Utils.CreateObjectTags(h3ObjectPath, h3ekPath, h2ekPath, h2TagPath, loadingForm);
+                        CreateObjectTags(h3ObjectPath, h3ekPath, h2ekPath, h2TagPath, loadingForm);
                     }
                 }
             }
@@ -245,7 +245,7 @@ namespace Ascension
                     // Create .sound_scenery tag if requested
                     if (createObjects)
                     {
-                        Utils.CreateObjectTags(h3ObjectPath, h3ekPath, h2ekPath, h2TagPath, loadingForm);
+                        CreateObjectTags(h3ObjectPath, h3ekPath, h2ekPath, h2TagPath, loadingForm);
                     }
                 }
             }
@@ -278,19 +278,19 @@ namespace Ascension
                 loadingForm.UpdateOutputBox($"Successfully opened \"{relativeScenPath}\"", false);
 
                 loadingForm.UpdateOutputBox($"Begin writing {paletteType} palette data", false);
-                ((TagFieldBlock)scenTag.SelectField($"Block:{paletteType} palette")).RemoveAllElements();
+                scenTag.SelectFieldType<TagFieldBlock>($"Block:{paletteType} palette").RemoveAllElements();
                 i = 0;
 
                 foreach (TagPath objPath in h3ObjPaths)
                 {
-                    ((TagFieldBlock)scenTag.SelectField($"Block:{paletteType} palette")).AddElement();
+                    scenTag.SelectFieldType<TagFieldBlock>($"Block:{paletteType} palette").AddElement();
                     if (paletteType == "character")
                     {
-                        ((TagFieldReference)scenTag.SelectField($"Block:{paletteType} palette[{i}]/Reference:reference")).Path = objPath;
+                        scenTag.SelectFieldType<TagFieldReference>($"Block:{paletteType} palette[{i}]/Reference:reference").Path = objPath;
                     }
                     else
                     {
-                        ((TagFieldReference)scenTag.SelectField($"Block:{paletteType} palette[{i}]/Reference:name")).Path = objPath;
+                        scenTag.SelectFieldType<TagFieldReference>($"Block:{paletteType} palette[{i}]/Reference:name").Path = objPath;
                     }
 
                     i++;
@@ -327,13 +327,13 @@ namespace Ascension
         {
             TPlacement objPlacement = new TPlacement
             {
-                TypeIndex = Int32.Parse(element.SelectSingleNode("./block_index[@name='short block index' and @type='type']").Attributes["index"]?.Value),
-                NameIndex = Int32.Parse(element.SelectSingleNode("./block_index[@name='short block index' and @type='name']").Attributes["index"]?.Value),
+                TypeIndex = int.Parse(element.SelectSingleNode("./block_index[@name='short block index' and @type='type']").Attributes["index"]?.Value),
+                NameIndex = int.Parse(element.SelectSingleNode("./block_index[@name='short block index' and @type='name']").Attributes["index"]?.Value),
                 Position = element.SelectSingleNode("./field[@name='position']").InnerText.Trim().Split(',').Select(float.Parse).ToArray(),
                 Rotation = element.SelectSingleNode("./field[@name='rotation']").InnerText.Trim().Split(',').Select(float.Parse).ToArray(),
-                ManualBsp = UInt32.Parse(element.SelectSingleNode("./field[@name='manual bsp flags']").InnerText.Trim().Substring(0, 1)),
-                OriginBsp = Int32.Parse(element.SelectSingleNode("./block_index[@name='short block index' and @type='origin bsp index']").Attributes["index"].Value),
-                BspPolicy = Int32.Parse(element.SelectSingleNode("./field[@name='bsp policy']").InnerText.Trim().Substring(0, 1))
+                ManualBsp = uint.Parse(element.SelectSingleNode("./field[@name='manual bsp flags']").InnerText.Trim().Substring(0, 1)),
+                OriginBsp = int.Parse(element.SelectSingleNode("./block_index[@name='short block index' and @type='origin bsp index']").Attributes["index"].Value),
+                BspPolicy = int.Parse(element.SelectSingleNode("./field[@name='bsp policy']").InnerText.Trim().Substring(0, 1))
             };
 
             // Devices and sound scenery don't have variant fields
@@ -415,79 +415,79 @@ namespace Ascension
         public static void WriteObjectData<T>(TagFile tagFile, List<T> allObjPlacements, string type, Loading loadingForm) where T : ObjectPlacement
         {
             loadingForm.UpdateOutputBox($"Begin writing {type} data to scenario tag", false);
-            ((TagFieldBlock)tagFile.SelectField($"Block:{type}")).RemoveAllElements();
+            tagFile.SelectFieldType<TagFieldBlock>($"Block:{type}").RemoveAllElements();
             int index = 0;
 
             foreach (ObjectPlacement placement in allObjPlacements)
             {
-                ((TagFieldBlock)tagFile.SelectField($"Block:{type}")).AddElement();
+                tagFile.SelectFieldType<TagFieldBlock>($"Block:{type}").AddElement();
 
                 // Common properties
-                ((TagFieldBlockIndex)tagFile.SelectField($"Block:{type}[{index}]/ShortBlockIndex:type")).Value = placement.TypeIndex;
-                ((TagFieldBlockIndex)tagFile.SelectField($"Block:{type}[{index}]/ShortBlockIndex:name")).Value = placement.NameIndex;
-                ((TagFieldFlags)tagFile.SelectField($"Block:{type}[{index}]/Struct:object data/Flags:placement flags")).RawValue = placement.Flags;
-                ((TagFieldElementArraySingle)tagFile.SelectField($"Block:{type}[{index}]/Struct:object data/RealPoint3d:position")).Data = placement.Position;
-                ((TagFieldElementArraySingle)tagFile.SelectField($"Block:{type}[{index}]/Struct:object data/RealEulerAngles3d:rotation")).Data = placement.Rotation;
-                ((TagFieldElementSingle)tagFile.SelectField($"Block:{type}[{index}]/Struct:object data/Real:scale")).Data = placement.Scale;
-                ((TagFieldBlockFlags)tagFile.SelectField($"Block:{type}[{index}]/Struct:object data/WordBlockFlags:manual bsp flags")).Value = placement.ManualBsp;
-                ((TagFieldBlockIndex)tagFile.SelectField($"Block:{type}[{index}]/Struct:object data/Struct:object id/ShortBlockIndex:origin bsp index")).Value = placement.OriginBsp;
-                ((TagFieldEnum)tagFile.SelectField($"Block:{type}[{index}]/Struct:object data/CharEnum:bsp policy")).Value = placement.BspPolicy;
-                ((TagFieldEnum)tagFile.SelectField($"Block:{type}[{index}]/Struct:object data/Struct:object id/CharEnum:type")).Value = objTypeToIndex[type]; // 2 for weapon
-                ((TagFieldEnum)tagFile.SelectField($"Block:{type}[{index}]/Struct:object data/Struct:object id/CharEnum:source")).Value = 1; // 1 for editor
+                tagFile.SelectFieldType<TagFieldBlockIndex>($"Block:{type}[{index}]/ShortBlockIndex:type").Value = placement.TypeIndex;
+                tagFile.SelectFieldType<TagFieldBlockIndex>($"Block:{type}[{index}]/ShortBlockIndex:name").Value = placement.NameIndex;
+                tagFile.SelectFieldType<TagFieldFlags>($"Block:{type}[{index}]/Struct:object data/Flags:placement flags").RawValue = placement.Flags;
+                tagFile.SelectFieldType<TagFieldElementArraySingle>($"Block:{type}[{index}]/Struct:object data/RealPoint3d:position").Data = placement.Position;
+                tagFile.SelectFieldType<TagFieldElementArraySingle>($"Block:{type}[{index}]/Struct:object data/RealEulerAngles3d:rotation").Data = placement.Rotation;
+                tagFile.SelectFieldType<TagFieldElementSingle>($"Block:{type}[{index}]/Struct:object data/Real:scale").Data = placement.Scale;
+                tagFile.SelectFieldType<TagFieldBlockFlags>($"Block:{type}[{index}]/Struct:object data/WordBlockFlags:manual bsp flags").Value = placement.ManualBsp;
+                tagFile.SelectFieldType<TagFieldBlockIndex>($"Block:{type}[{index}]/Struct:object data/Struct:object id/ShortBlockIndex:origin bsp index").Value = placement.OriginBsp;
+                tagFile.SelectFieldType<TagFieldEnum>($"Block:{type}[{index}]/Struct:object data/CharEnum:bsp policy").Value = placement.BspPolicy;
+                tagFile.SelectFieldType<TagFieldEnum>($"Block:{type}[{index}]/Struct:object data/Struct:object id/CharEnum:type").Value = objTypeToIndex[type]; // 2 for weapon
+                tagFile.SelectFieldType<TagFieldEnum>($"Block:{type}[{index}]/Struct:object data/Struct:object id/CharEnum:source").Value = 1; // 1 for editor
 
                 if (!(placement is Device) && !(placement is SoundScenery)) // Devices and sound scenery don't have variant info from H2
                 {
-                    ((TagFieldElementStringID)tagFile.SelectField($"Block:{type}[{index}]/Struct:permutation data/StringId:variant name")).Data = placement.VarName;
+                    tagFile.SelectFieldType<TagFieldElementStringID>($"Block:{type}[{index}]/Struct:permutation data/StringId:variant name").Data = placement.VarName;
                 }
 
                 // SP weapon-specific properties
                 if (placement is SpWeapLoc weapon)
                 {
-                    ((TagFieldElementInteger)tagFile.SelectField($"Block:weapons[{index}]/Struct:weapon data/ShortInteger:rounds left")).Data = weapon.RoundsLeft;
-                    ((TagFieldElementInteger)tagFile.SelectField($"Block:weapons[{index}]/Struct:weapon data/ShortInteger:rounds loaded")).Data = weapon.RoundsLoaded;
+                    tagFile.SelectFieldType<TagFieldElementInteger>($"Block:weapons[{index}]/Struct:weapon data/ShortInteger:rounds left").Data = weapon.RoundsLeft;
+                    tagFile.SelectFieldType<TagFieldElementInteger>($"Block:weapons[{index}]/Struct:weapon data/ShortInteger:rounds loaded").Data = weapon.RoundsLoaded;
                 }
                 // Scenery-specific properties
                 else if (placement is Scenery scenery)
                 {
-                    ((TagFieldEnum)tagFile.SelectField($"Block:scenery[{index}]/Struct:scenery data/ShortEnum:Pathfinding policy")).Value = scenery.PathfindingType;
-                    ((TagFieldEnum)tagFile.SelectField($"Block:scenery[{index}]/Struct:scenery data/ShortEnum:Lightmapping policy")).Value = scenery.LightmappingType;
+                    tagFile.SelectFieldType<TagFieldEnum>($"Block:scenery[{index}]/Struct:scenery data/ShortEnum:Pathfinding policy").Value = scenery.PathfindingType;
+                    tagFile.SelectFieldType<TagFieldEnum>($"Block:scenery[{index}]/Struct:scenery data/ShortEnum:Lightmapping policy").Value = scenery.LightmappingType;
                 }
                 // Vehicle-specific properties
                 else if (placement is Vehicle vehicle)
                 {
-                    ((TagFieldElementSingle)tagFile.SelectField($"Block:vehicles[{index}]/Struct:unit data/Real:body vitality")).Data = vehicle.BodyVitality;
+                    tagFile.SelectFieldType<TagFieldElementSingle>($"Block:vehicles[{index}]/Struct:unit data/Real:body vitality").Data = vehicle.BodyVitality;
                 }
                 // Device-specific properties
                 else if (placement is Device device)
                 {
-                    ((TagFieldBlockIndex)tagFile.SelectField($"Block:machines[{index}]/Struct:device data/ShortBlockIndex:power group")).Value = device.PowerGroupIndex;
-                    ((TagFieldBlockIndex)tagFile.SelectField($"Block:machines[{index}]/Struct:device data/ShortBlockIndex:position group")).Value = device.PositionGroupIndex;
-                    ((TagFieldFlags)tagFile.SelectField($"Block:{type}[{index}]/Struct:device data/Flags:flags")).RawValue = device.DeviceFlags1;
+                    tagFile.SelectFieldType<TagFieldBlockIndex>($"Block:machines[{index}]/Struct:device data/ShortBlockIndex:power group").Value = device.PowerGroupIndex;
+                    tagFile.SelectFieldType<TagFieldBlockIndex>($"Block:machines[{index}]/Struct:device data/ShortBlockIndex:position group").Value = device.PositionGroupIndex;
+                    tagFile.SelectFieldType<TagFieldFlags>($"Block:{type}[{index}]/Struct:device data/Flags:flags").RawValue = device.DeviceFlags1;
 
                     // Machines and controls have different struct names
                     if (type == "machines")
                     {
-                        ((TagFieldFlags)tagFile.SelectField($"Block:{type}[{index}]/Struct:machine data/Flags:flags")).RawValue = device.DeviceFlags2;
+                        tagFile.SelectFieldType<TagFieldFlags>($"Block:{type}[{index}]/Struct:machine data/Flags:flags").RawValue = device.DeviceFlags2;
                     }
                     else
                     {
-                        ((TagFieldFlags)tagFile.SelectField($"Block:{type}[{index}]/Struct:control data/Flags:flags")).RawValue = device.DeviceFlags2;
+                        tagFile.SelectFieldType<TagFieldFlags>($"Block:{type}[{index}]/Struct:control data/Flags:flags").RawValue = device.DeviceFlags2;
                     }
                 }
                 // Biped-specific properties
                 else if (placement is Biped biped)
                 {
-                    ((TagFieldElementSingle)tagFile.SelectField($"Block:bipeds[{index}]/Struct:unit data/Real:body vitality")).Data = biped.BodyVitality;
-                    ((TagFieldFlags)tagFile.SelectField($"Block:bipeds[{index}]/Struct:unit data/Flags:flags")).RawValue = biped.BipedFlags;
+                    tagFile.SelectFieldType<TagFieldElementSingle>($"Block:bipeds[{index}]/Struct:unit data/Real:body vitality").Data = biped.BodyVitality;
+                    tagFile.SelectFieldType<TagFieldFlags>($"Block:bipeds[{index}]/Struct:unit data/Flags:flags").RawValue = biped.BipedFlags;
                 }
                 // Sound scenery-specific properties
                 else if (placement is SoundScenery sscen)
                 {
-                    ((TagFieldEnum)tagFile.SelectField($"Block:sound scenery[{index}]/Struct:sound_scenery/LongEnum:volume type")).Value = sscen.VolumeType;
-                    ((TagFieldElementSingle)tagFile.SelectField($"Block:sound scenery[{index}]/Struct:sound_scenery/Real:height")).Data = sscen.Height;
-                    ((TagFieldElementArraySingle)tagFile.SelectField($"Block:sound scenery[{index}]/Struct:sound_scenery/RealBounds:override distance bounds")).Data = sscen.DistBounds;
-                    ((TagFieldElementArraySingle)tagFile.SelectField($"Block:sound scenery[{index}]/Struct:sound_scenery/AngleBounds:override cone angle bounds")).Data = sscen.ConeAngleBounds;
-                    ((TagFieldElementSingle)tagFile.SelectField($"Block:sound scenery[{index}]/Struct:sound_scenery/Real:override outer cone gain")).Data = sscen.OuterConeGain;
+                    tagFile.SelectFieldType<TagFieldEnum>($"Block:sound scenery[{index}]/Struct:sound_scenery/LongEnum:volume type").Value = sscen.VolumeType;
+                    tagFile.SelectFieldType<TagFieldElementSingle>($"Block:sound scenery[{index}]/Struct:sound_scenery/Real:height").Data = sscen.Height;
+                    tagFile.SelectFieldType<TagFieldElementArraySingle>($"Block:sound scenery[{index}]/Struct:sound_scenery/RealBounds:override distance bounds").Data = sscen.DistBounds;
+                    tagFile.SelectFieldType<TagFieldElementArraySingle>($"Block:sound scenery[{index}]/Struct:sound_scenery/AngleBounds:override cone angle bounds").Data = sscen.ConeAngleBounds;
+                    tagFile.SelectFieldType<TagFieldElementSingle>($"Block:sound scenery[{index}]/Struct:sound_scenery/Real:override outer cone gain").Data = sscen.OuterConeGain;
                 }
                 else if (placement is Crate crate) { }
 
@@ -536,19 +536,19 @@ namespace Ascension
                         switch (Path.GetExtension(reference))
                         {
                             case ".render_model":
-                                ((TagFieldReference)modelTag.SelectField("Reference:render model")).Path = TagPath.FromPathAndExtension(Path.Combine(Path.GetDirectoryName(reference), Path.GetFileNameWithoutExtension(reference)), "render_model");
+                                modelTag.SelectFieldType<TagFieldReference>("Reference:render model").Path = TagPath.FromPathAndExtension(Path.Combine(Path.GetDirectoryName(reference), Path.GetFileNameWithoutExtension(reference)), "render_model");
                                 break;
                             case ".collision_model":
-                                ((TagFieldReference)modelTag.SelectField("Reference:collision model")).Path = TagPath.FromPathAndExtension(Path.Combine(Path.GetDirectoryName(reference), Path.GetFileNameWithoutExtension(reference)), "collision_model");
+                                modelTag.SelectFieldType<TagFieldReference>("Reference:collision model").Path = TagPath.FromPathAndExtension(Path.Combine(Path.GetDirectoryName(reference), Path.GetFileNameWithoutExtension(reference)), "collision_model");
                                 break;
                             case ".physics_model":
-                                ((TagFieldReference)modelTag.SelectField("Reference:physics_model")).Path = TagPath.FromPathAndExtension(Path.Combine(Path.GetDirectoryName(reference), Path.GetFileNameWithoutExtension(reference)), "physics_model");
+                                modelTag.SelectFieldType<TagFieldReference>("Reference:physics_model").Path = TagPath.FromPathAndExtension(Path.Combine(Path.GetDirectoryName(reference), Path.GetFileNameWithoutExtension(reference)), "physics_model");
                                 break;
                         }
                     }
 
-                    ((TagFieldEnum)modelTag.SelectField("CharEnum:PRT shadow detail")).Value = 2;
-                    ((TagFieldEnum)modelTag.SelectField("CharEnum:PRT shadow bounces")).Value = 2;
+                    modelTag.SelectFieldType<TagFieldEnum>("CharEnum:PRT shadow detail").Value = 2;
+                    modelTag.SelectFieldType<TagFieldEnum>("CharEnum:PRT shadow bounces").Value = 2;
 
                     modelTag.Save();
                 }
@@ -570,21 +570,21 @@ namespace Ascension
                 {
                     case "scenery":
                     case "crate":
-                        ((TagFieldReference)objectTag.SelectField("Struct:object[0]/Reference:model")).Path = referenceTagPath;
-                        ((TagFieldElementSingle)objectTag.SelectField("Struct:object[0]/Real:bounding radius")).Data = boundingRadius;
+                        objectTag.SelectFieldType<TagFieldReference>("Struct:object[0]/Reference:model").Path = referenceTagPath;
+                        objectTag.SelectFieldType<TagFieldElementSingle>("Struct:object[0]/Real:bounding radius").Data = boundingRadius;
                         break;
 
                     case "device_machine": 
                     case "device_control":
-                        ((TagFieldReference)objectTag.SelectField("Struct:device[0]/Struct:object[0]/Reference:model")).Path = referenceTagPath;
-                        ((TagFieldElementSingle)objectTag.SelectField("Struct:device[0]/Struct:object[0]/Real:bounding radius")).Data = boundingRadius;
+                        objectTag.SelectFieldType<TagFieldReference>("Struct:device[0]/Struct:object[0]/Reference:model").Path = referenceTagPath;
+                        objectTag.SelectFieldType<TagFieldElementSingle>("Struct:device[0]/Struct:object[0]/Real:bounding radius").Data = boundingRadius;
                         break;
 
                     case "sound_scenery":
-                        ((TagFieldEnum)objectTag.SelectField("Struct:object[0]/CharEnum:sweetener size")).Value = 1;
-                        ((TagFieldBlock)objectTag.SelectField("Struct:object[0]/Block:attachments")).AddElement();
-                        ((TagFieldReference)objectTag.SelectField("Struct:object[0]/Block:attachments[0]/Reference:type")).Path = referenceTagPath;
-                        ((TagFieldElementSingle)objectTag.SelectField("Struct:object[0]/Real:bounding radius")).Data = boundingRadius;
+                        objectTag.SelectFieldType<TagFieldEnum>("Struct:object[0]/CharEnum:sweetener size").Value = 1;
+                        objectTag.SelectFieldType<TagFieldBlock>("Struct:object[0]/Block:attachments").AddElement();
+                        objectTag.SelectFieldType<TagFieldReference>("Struct:object[0]/Block:attachments[0]/Reference:type").Path = referenceTagPath;
+                        objectTag.SelectFieldType<TagFieldElementSingle>("Struct:object[0]/Real:bounding radius").Data = boundingRadius;
                         break;
                 }
 

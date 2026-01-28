@@ -4,8 +4,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Xml;
 
@@ -212,113 +210,113 @@ namespace Ascension
                 scenTag.Load(relativeScenPath);
                 loadingForm.UpdateOutputBox($"Successfully opened \"{relativeScenPath}\"", false);
 
-                // Write parallelogram geometry data before jump hints to make sure they can reference something
-                int bspIndex = 0;
-
                 // Make sure hint data block exists
-                if (((TagFieldBlock)scenTag.SelectField($"Block:ai user hint data")).Elements.Count() == 0)
+                if (scenTag.SelectFieldType<TagFieldBlock>($"Block:ai user hint data").Elements.Count == 0)
                 {
-                    ((TagFieldBlock)scenTag.SelectField($"Block:ai user hint data")).AddElement();
+                    scenTag.SelectFieldType<TagFieldBlock>($"Block:ai user hint data").AddElement();
                 }
 
-                ((TagFieldBlock)scenTag.SelectField($"Block:ai user hint data[0]/Block:parallelogram geometry")).RemoveAllElements();
-                foreach (BspParallelos bsp in scenarioParallelosContainer.scenarioParallelos)
+                scenTag.SelectFieldType<TagFieldBlock>($"Block:ai user hint data[0]/Block:parallelogram geometry").RemoveAllElements();
+
+                for (int bspIndex = 0; bspIndex < scenarioParallelosContainer.scenarioParallelos.Count; bspIndex++) 
                 {
                     loadingForm.UpdateOutputBox($"Start writing parallelogram geometry data for bsp {bspIndex}", false);
 
-                    // Loops over every parallelogram entry and writes it to tag
-                    int i = 0;
+                    BspParallelos bsp = scenarioParallelosContainer.scenarioParallelos[bspIndex];
+
                     if (bsp.parallelograms != null)
                     {
-                        foreach (Parallelogram para in bsp.parallelograms)
+                        for (int parallelogramIndex = 0; parallelogramIndex < bsp.parallelograms.Count; parallelogramIndex++) 
                         {
-                            loadingForm.UpdateOutputBox($"Parallelogram {i}", false);
+                            loadingForm.UpdateOutputBox($"Parallelogram {parallelogramIndex}", false);
 
-                            int parallelCount = ((TagFieldBlock)scenTag.SelectField($"Block:ai user hint data[0]/Block:parallelogram geometry")).Count();
-                            ((TagFieldBlock)scenTag.SelectField($"Block:ai user hint data[0]/Block:parallelogram geometry")).AddElement();
+                            Parallelogram para = bsp.parallelograms[parallelogramIndex];
+
+                            int parallelCount = scenTag.SelectFieldType<TagFieldBlock>($"Block:ai user hint data[0]/Block:parallelogram geometry").Count();
+                            scenTag.SelectFieldType<TagFieldBlock>($"Block:ai user hint data[0]/Block:parallelogram geometry").AddElement();
 
                             // Flags
-                            ((TagFieldFlags)scenTag.SelectField($"Block:ai user hint data[0]/Block:parallelogram geometry[{parallelCount}]/Flags:Flags")).RawValue = UInt32.Parse(para.Flags.Substring(0, 1));
+                            scenTag.SelectFieldType<TagFieldFlags>($"Block:ai user hint data[0]/Block:parallelogram geometry[{parallelCount}]/Flags:Flags").RawValue = uint.Parse(para.Flags.Substring(0, 1));
 
                             // Point 0
-                            ((TagFieldElementArraySingle)scenTag.SelectField($"Block:ai user hint data[0]/Block:parallelogram geometry[{parallelCount}]/RealPoint3d:Point 0")).Data = para.Point0.Split(',').Select(float.Parse).ToArray();
-                            ((TagFieldBlockIndex)scenTag.SelectField($"Block:ai user hint data[0]/Block:parallelogram geometry[{parallelCount}]/ShortBlockIndex:structure bsp 0")).Value = bspIndex;
+                            scenTag.SelectFieldType<TagFieldElementArraySingle>($"Block:ai user hint data[0]/Block:parallelogram geometry[{parallelCount}]/RealPoint3d:Point 0").Data = para.Point0.Split(',').Select(float.Parse).ToArray();
+                            scenTag.SelectFieldType<TagFieldBlockIndex>($"Block:ai user hint data[0]/Block:parallelogram geometry[{parallelCount}]/ShortBlockIndex:structure bsp 0").Value = bspIndex;
 
                             // Point 1
-                            ((TagFieldElementArraySingle)scenTag.SelectField($"Block:ai user hint data[0]/Block:parallelogram geometry[{parallelCount}]/RealPoint3d:Point 1")).Data = para.Point1.Split(',').Select(float.Parse).ToArray();
-                            ((TagFieldBlockIndex)scenTag.SelectField($"Block:ai user hint data[0]/Block:parallelogram geometry[{parallelCount}]/ShortBlockIndex:structure bsp 1")).Value = bspIndex;
+                            scenTag.SelectFieldType<TagFieldElementArraySingle>($"Block:ai user hint data[0]/Block:parallelogram geometry[{parallelCount}]/RealPoint3d:Point 1").Data = para.Point1.Split(',').Select(float.Parse).ToArray();
+                            scenTag.SelectFieldType<TagFieldBlockIndex>($"Block:ai user hint data[0]/Block:parallelogram geometry[{parallelCount}]/ShortBlockIndex:structure bsp 1").Value = bspIndex;
 
                             // Point 2
-                            ((TagFieldElementArraySingle)scenTag.SelectField($"Block:ai user hint data[0]/Block:parallelogram geometry[{parallelCount}]/RealPoint3d:Point 2")).Data = para.Point2.Split(',').Select(float.Parse).ToArray();
-                            ((TagFieldBlockIndex)scenTag.SelectField($"Block:ai user hint data[0]/Block:parallelogram geometry[{parallelCount}]/ShortBlockIndex:structure bsp 2")).Value = bspIndex;
+                            scenTag.SelectFieldType<TagFieldElementArraySingle>($"Block:ai user hint data[0]/Block:parallelogram geometry[{parallelCount}]/RealPoint3d:Point 2").Data = para.Point2.Split(',').Select(float.Parse).ToArray();
+                            scenTag.SelectFieldType<TagFieldBlockIndex>($"Block:ai user hint data[0]/Block:parallelogram geometry[{parallelCount}]/ShortBlockIndex:structure bsp 2").Value = bspIndex;
 
                             // Point 3
-                            ((TagFieldElementArraySingle)scenTag.SelectField($"Block:ai user hint data[0]/Block:parallelogram geometry[{parallelCount}]/RealPoint3d:Point 3")).Data = para.Point3.Split(',').Select(float.Parse).ToArray();
-                            ((TagFieldBlockIndex)scenTag.SelectField($"Block:ai user hint data[0]/Block:parallelogram geometry[{parallelCount}]/ShortBlockIndex:structure bsp 3")).Value = bspIndex;
-
-                            i++;
+                            scenTag.SelectFieldType<TagFieldElementArraySingle>($"Block:ai user hint data[0]/Block:parallelogram geometry[{parallelCount}]/RealPoint3d:Point 3").Data = para.Point3.Split(',').Select(float.Parse).ToArray();
+                            scenTag.SelectFieldType<TagFieldBlockIndex>($"Block:ai user hint data[0]/Block:parallelogram geometry[{parallelCount}]/ShortBlockIndex:structure bsp 3").Value = bspIndex;
                         }
                     }
-
-                    bspIndex++;
                 }
 
                 loadingForm.UpdateOutputBox($"Finished writing parallelogram geometry data", false);
 
-                // Time to write the jump hint data
-                bspIndex = 0;
                 int hintStartIndex = 0;
-                ((TagFieldBlock)scenTag.SelectField($"Block:ai user hint data[0]/Block:jump hints")).RemoveAllElements();
-                foreach (BspJumpHints bsp in scenarioHintsContainer.scenarioHints)
+
+                // Time to write the jump hint data
+                scenTag.SelectFieldType<TagFieldBlock>($"Block:ai user hint data[0]/Block:jump hints").RemoveAllElements();
+
+                for (int bspIndex = 0; bspIndex < scenarioHintsContainer.scenarioHints.Count; bspIndex++) 
                 {
                     loadingForm.UpdateOutputBox($"Start writing jump hint data for bsp {bspIndex}", false);
 
-                    // Loops over every parallelogram entry and writes it to tag
-                    int i = 0;
+                    BspJumpHints bsp = scenarioHintsContainer.scenarioHints[bspIndex];
+
                     if (bsp.jumpHints != null)
                     {
-                        foreach (JumpHint jHint in bsp.jumpHints)
+                        for (int jumpHintIndex = 0; jumpHintIndex < bsp.jumpHints.Count; jumpHintIndex++)
                         {
-                            loadingForm.UpdateOutputBox($"Jump hint {i}", false);
+                            loadingForm.UpdateOutputBox($"Jump hint {jumpHintIndex}", false);
 
-                            int hintCount = ((TagFieldBlock)scenTag.SelectField($"Block:ai user hint data[0]/Block:jump hints")).Count();
-                            ((TagFieldBlock)scenTag.SelectField($"Block:ai user hint data[0]/Block:jump hints")).AddElement();
+                            JumpHint hint = bsp.jumpHints[jumpHintIndex];
+
+                            int hintCount = scenTag.SelectFieldType<TagFieldBlock>($"Block:ai user hint data[0]/Block:jump hints").Count();
+
+                            scenTag.SelectFieldType<TagFieldBlock>($"Block:ai user hint data[0]/Block:jump hints").AddElement();
 
                             // Flags
-                            ((TagFieldFlags)scenTag.SelectField($"Block:ai user hint data[0]/Block:jump hints[{hintCount}]/WordFlags:Flags")).RawValue = UInt32.Parse(jHint.Flags.Substring(0, 1));
+                            scenTag.SelectFieldType<TagFieldFlags>($"Block:ai user hint data[0]/Block:jump hints[{hintCount}]/WordFlags:Flags").RawValue = uint.Parse(hint.Flags.Substring(0, 1));
 
                             // Geometry index - H2 stores jump hints and their respective parallelograms on a per-bsp basis. H3 does not, so we must account for the previous parallelograms as well
-                            ((TagFieldBlockIndex)scenTag.SelectField($"Block:ai user hint data[0]/Block:jump hints[{hintCount}]/ShortBlockIndex:geometry index")).Value = Int32.Parse(jHint.ParallelIndex) + hintStartIndex;
+                            scenTag.SelectFieldType<TagFieldBlockIndex>($"Block:ai user hint data[0]/Block:jump hints[{hintCount}]/ShortBlockIndex:geometry index").Value = int.Parse(hint.ParallelIndex) + hintStartIndex;
 
                             // Force jump height
-                            string test = jHint.JumpHeight;
-                            ((TagFieldEnum)scenTag.SelectField($"Block:ai user hint data[0]/Block:jump hints[{hintCount}]/ShortEnum:force jump height")).Value = Int32.Parse(jHint.JumpHeight.Substring(0, 1));
-
-                            i++;
+                            string test = hint.JumpHeight;
+                            scenTag.SelectFieldType<TagFieldEnum>($"Block:ai user hint data[0]/Block:jump hints[{hintCount}]/ShortEnum:force jump height").Value = int.Parse(hint.JumpHeight.Substring(0, 1));
                         }
                     }
 
-                    hintStartIndex = ((TagFieldBlock)scenTag.SelectField($"Block:ai user hint data[0]/Block:jump hints")).Count();
-                    bspIndex++;
+                    hintStartIndex = scenTag.SelectFieldType<TagFieldBlock>($"Block:ai user hint data[0]/Block:jump hints").Count();
                 }
 
                 // Flight hint data
-                int hintIndex = 0;
-                ((TagFieldBlock)scenTag.SelectField($"Block:ai user hint data[0]/Block:flight hints")).RemoveAllElements();
-                foreach (List<FlightHint> flightHintList in scenarioFlightHints)
-                {
-                    foreach (FlightHint flightHint in flightHintList)
-                    {
-                        int pointIndex = 0;
-                        ((TagFieldBlock)scenTag.SelectField($"Block:ai user hint data[0]/Block:flight hints")).AddElement();
-                        foreach (float[] point in flightHint.Points)
-                        {
-                            ((TagFieldBlock)scenTag.SelectField($"Block:ai user hint data[0]/Block:flight hints[{hintIndex}]/Block:points")).AddElement();
-                            ((TagFieldElementArraySingle)scenTag.SelectField($"Block:ai user hint data[0]/Block:flight hints[{hintIndex}]/Block:points[{pointIndex}]/RealVector3d:point")).Data = point;
+                scenTag.SelectFieldType<TagFieldBlock>($"Block:ai user hint data[0]/Block:flight hints").RemoveAllElements();
 
-                            pointIndex++;
+                for (int hintListIndex = 0; hintListIndex < scenarioFlightHints.Count; hintListIndex++) 
+                {
+                    List<FlightHint> hintList = scenarioFlightHints[hintListIndex];
+
+                    for (int hintIndex = 0; hintIndex < hintList.Count; hintIndex++) 
+                    {
+                        FlightHint flightHint = hintList[hintIndex];
+
+                        scenTag.SelectFieldType<TagFieldBlock>($"Block:ai user hint data[0]/Block:flight hints").AddElement();
+
+                        for (int pointIndex = 0; pointIndex < flightHint.Points.Count; pointIndex++) 
+                        {
+                            float[] point = flightHint.Points[pointIndex];
+
+                            scenTag.SelectFieldType<TagFieldBlock>($"Block:ai user hint data[0]/Block:flight hints[{hintIndex}]/Block:points").AddElement();
+                            scenTag.SelectFieldType<TagFieldElementArraySingle>($"Block:ai user hint data[0]/Block:flight hints[{hintIndex}]/Block:points[{pointIndex}]/RealVector3d:point").Data = point;
                         }
-                        hintIndex++;
                     }
                 }
 

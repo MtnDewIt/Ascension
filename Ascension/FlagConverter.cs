@@ -1,5 +1,5 @@
-﻿using Bungie.Tags;
-using Bungie;
+﻿using Bungie;
+using Bungie.Tags;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -72,16 +72,16 @@ namespace Ascension
             {
                 scenTag.Load(relativeScenPath);
                 loadingForm.UpdateOutputBox($"Successfully opened \"{relativeScenPath}\"", false);
-                ((TagFieldBlock)scenTag.SelectField($"Block:cutscene flags")).RemoveAllElements();
+                scenTag.SelectFieldType<TagFieldBlock>($"Block:cutscene flags").RemoveAllElements();
 
                 i = 0;
                 foreach (FlagElement flag in allFlags)
                 {
                     loadingForm.UpdateOutputBox($"Writing data for cutscene flag {i}", false);
-                    ((TagFieldBlock)scenTag.SelectField($"Block:cutscene flags")).AddElement();
-                    ((TagFieldElementStringID)scenTag.SelectField($"Block:cutscene flags[{i}]/StringId:name")).Data = flag.Name;
-                    ((TagFieldElementArraySingle)scenTag.SelectField($"Block:cutscene flags[{i}]/RealPoint3d:position")).Data = flag.Position;
-                    ((TagFieldElementArraySingle)scenTag.SelectField($"Block:cutscene flags[{i}]/RealEulerAngles2d:facing")).Data = flag.Facing;
+                    scenTag.SelectFieldType<TagFieldBlock>($"Block:cutscene flags").AddElement();
+                    scenTag.SelectFieldType<TagFieldElementStringID>($"Block:cutscene flags[{i}]/StringId:name").Data = flag.Name;
+                    scenTag.SelectFieldType<TagFieldElementArraySingle>($"Block:cutscene flags[{i}]/RealPoint3d:position").Data = flag.Position;
+                    scenTag.SelectFieldType<TagFieldElementArraySingle>($"Block:cutscene flags[{i}]/RealEulerAngles2d:facing").Data = flag.Facing;
                     i++;
                 }
             }

@@ -1,5 +1,5 @@
-﻿using Bungie.Tags;
-using Bungie;
+﻿using Bungie;
+using Bungie.Tags;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -108,15 +108,15 @@ namespace Ascension
             {
                 scenTag.Load(relativeScenPath);
                 loadingForm.UpdateOutputBox($"Successfully opened \"{relativeScenPath}\"", false);
-                ((TagFieldBlock)scenTag.SelectField($"Block:squad groups")).RemoveAllElements();
+                scenTag.SelectFieldType<TagFieldBlock>($"Block:squad groups").RemoveAllElements();
 
                 i = 0;
                 foreach (SquadGroup group in allGroups)
                 {
                     loadingForm.UpdateOutputBox($"Writing data for squad group \"{group.Name}\"", false);
-                    ((TagFieldBlock)scenTag.SelectField($"Block:squad groups")).AddElement();
-                    ((TagFieldElementString)scenTag.SelectField($"Block:squad groups[{i}]/String:name")).Data = group.Name;
-                    ((TagFieldBlockIndex)scenTag.SelectField($"Block:squad groups[{i}]/ShortBlockIndex:parent")).Value = group.ParentIndex;
+                    scenTag.SelectFieldType<TagFieldBlock>($"Block:squad groups").AddElement();
+                    scenTag.SelectFieldType<TagFieldElementString>($"Block:squad groups[{i}]/String:name").Data = group.Name;
+                    scenTag.SelectFieldType<TagFieldBlockIndex>($"Block:squad groups[{i}]/ShortBlockIndex:parent").Value = group.ParentIndex;
                     i++;
                 }
             }
@@ -199,16 +199,16 @@ namespace Ascension
                         squad.Name = squadEntry.SelectSingleNode("./field[@name='name']").InnerText.Trim();
                         loadingForm.UpdateOutputBox($"Reading data for squad {i} ({squad.Name}).", false);
                         string[] checkedFlags = squadEntry.SelectSingleNode("./field[@name='flags']").InnerText.Trim().Split('\n');
-                        squad.ParentIndex = Int32.Parse(squadEntry.SelectSingleNode("./block_index[@name='short block index' and @type='parent']").Attributes["index"]?.Value);
-                        squad.NormalDiff = Int32.Parse(squadEntry.SelectSingleNode("./field[@name='normal diff count']").InnerText.Trim());
-                        squad.InsaneDiff = Int32.Parse(squadEntry.SelectSingleNode("./field[@name='insane diff count']").InnerText.Trim());
-                        squad.Upgrade = Int32.Parse(squadEntry.SelectSingleNode("./field[@name='major upgrade']").InnerText.Trim().Substring(0, 1));
-                        squad.VehiIndex = Int32.Parse(squadEntry.SelectSingleNode("./block_index[@name='short block index' and @type='vehicle type']").Attributes["index"]?.Value);
-                        squad.CharIndex = Int32.Parse(squadEntry.SelectSingleNode("./block_index[@name='short block index' and @type='character type']").Attributes["index"]?.Value);
-                        squad.WeapIndex = Int32.Parse(squadEntry.SelectSingleNode("./block_index[@name='short block index' and @type='initial weapon']").Attributes["index"]?.Value);
-                        squad.WeapIndex2 = Int32.Parse(squadEntry.SelectSingleNode("./block_index[@name='short block index' and @type='initial secondary weapon']").Attributes["index"]?.Value);
-                        squad.Zone = Int32.Parse(squadEntry.SelectSingleNode("./block_index[@name='short block index' and @type='initial zone']").Attributes["index"]?.Value);
-                        squad.Grenade = Int32.Parse(squadEntry.SelectSingleNode("./field[@name='grenade type']").InnerText.Trim().Substring(0, 1));
+                        squad.ParentIndex = int.Parse(squadEntry.SelectSingleNode("./block_index[@name='short block index' and @type='parent']").Attributes["index"]?.Value);
+                        squad.NormalDiff = int.Parse(squadEntry.SelectSingleNode("./field[@name='normal diff count']").InnerText.Trim());
+                        squad.InsaneDiff = int.Parse(squadEntry.SelectSingleNode("./field[@name='insane diff count']").InnerText.Trim());
+                        squad.Upgrade = int.Parse(squadEntry.SelectSingleNode("./field[@name='major upgrade']").InnerText.Trim().Substring(0, 1));
+                        squad.VehiIndex = int.Parse(squadEntry.SelectSingleNode("./block_index[@name='short block index' and @type='vehicle type']").Attributes["index"]?.Value);
+                        squad.CharIndex = int.Parse(squadEntry.SelectSingleNode("./block_index[@name='short block index' and @type='character type']").Attributes["index"]?.Value);
+                        squad.WeapIndex = int.Parse(squadEntry.SelectSingleNode("./block_index[@name='short block index' and @type='initial weapon']").Attributes["index"]?.Value);
+                        squad.WeapIndex2 = int.Parse(squadEntry.SelectSingleNode("./block_index[@name='short block index' and @type='initial secondary weapon']").Attributes["index"]?.Value);
+                        squad.Zone = int.Parse(squadEntry.SelectSingleNode("./block_index[@name='short block index' and @type='initial zone']").Attributes["index"]?.Value);
+                        squad.Grenade = int.Parse(squadEntry.SelectSingleNode("./field[@name='grenade type']").InnerText.Trim().Substring(0, 1));
                         squad.VehiVariant = squadEntry.SelectSingleNode("./field[@name='vehicle variant']").InnerText.Trim();
                         squad.PlaceScript = squadEntry.SelectSingleNode("./field[@name='Placement script']").InnerText.Trim();
 
@@ -277,17 +277,17 @@ namespace Ascension
                                 startLoc.Position = locEntry.SelectSingleNode("./field[@name='position']").InnerText.Trim().Split(',').Select(float.Parse).ToArray();
                                 startLoc.Facing = locEntry.SelectSingleNode("./field[@name='facing (yaw, pitch)']").InnerText.Trim().Split(',').Select(float.Parse).ToArray();
                                 checkedFlags = locEntry.SelectSingleNode("./field[@name='flags']").InnerText.Trim().Split('\n');
-                                startLoc.CharIndex = Int32.Parse(locEntry.SelectSingleNode("./block_index[@name='short block index' and @type='character type']").Attributes["index"]?.Value);
-                                startLoc.WeapIndex = Int32.Parse(locEntry.SelectSingleNode("./block_index[@name='short block index' and @type='initial weapon']").Attributes["index"]?.Value);
-                                startLoc.WeapIndex2 = Int32.Parse(locEntry.SelectSingleNode("./block_index[@name='short block index' and @type='initial secondary weapon']").Attributes["index"]?.Value);
-                                startLoc.VehiIndex = Int32.Parse(locEntry.SelectSingleNode("./block_index[@name='short block index' and @type='vehicle type']").Attributes["index"]?.Value);
-                                startLoc.SeatType = Int32.Parse(locEntry.SelectSingleNode("./field[@name='seat type']").InnerText.Trim().Substring(0, 1));
-                                startLoc.Grenade = Int32.Parse(locEntry.SelectSingleNode("./field[@name='grenade type']").InnerText.Trim().Substring(0, 1));
-                                startLoc.Swarm = Int32.Parse(locEntry.SelectSingleNode("./field[@name='swarm count']").InnerText.Trim());
+                                startLoc.CharIndex = int.Parse(locEntry.SelectSingleNode("./block_index[@name='short block index' and @type='character type']").Attributes["index"]?.Value);
+                                startLoc.WeapIndex = int.Parse(locEntry.SelectSingleNode("./block_index[@name='short block index' and @type='initial weapon']").Attributes["index"]?.Value);
+                                startLoc.WeapIndex2 = int.Parse(locEntry.SelectSingleNode("./block_index[@name='short block index' and @type='initial secondary weapon']").Attributes["index"]?.Value);
+                                startLoc.VehiIndex = int.Parse(locEntry.SelectSingleNode("./block_index[@name='short block index' and @type='vehicle type']").Attributes["index"]?.Value);
+                                startLoc.SeatType = int.Parse(locEntry.SelectSingleNode("./field[@name='seat type']").InnerText.Trim().Substring(0, 1));
+                                startLoc.Grenade = int.Parse(locEntry.SelectSingleNode("./field[@name='grenade type']").InnerText.Trim().Substring(0, 1));
+                                startLoc.Swarm = int.Parse(locEntry.SelectSingleNode("./field[@name='swarm count']").InnerText.Trim());
                                 startLoc.ActorVar = locEntry.SelectSingleNode("./field[@name='actor variant name']").InnerText.Trim();
                                 startLoc.VehiVar = locEntry.SelectSingleNode("./field[@name='vehicle variant name']").InnerText.Trim();
                                 startLoc.MoveDist = float.Parse(locEntry.SelectSingleNode("./field[@name='initial movement distance']").InnerText.Trim());
-                                startLoc.MoveMode = Int32.Parse(locEntry.SelectSingleNode("./field[@name='initial movement mode']").InnerText.Trim().Substring(0, 1));
+                                startLoc.MoveMode = int.Parse(locEntry.SelectSingleNode("./field[@name='initial movement mode']").InnerText.Trim().Substring(0, 1));
                                 startLoc.PlaceScript = locEntry.SelectSingleNode("./field[@name='Placement script']").InnerText.Trim();
 
                                 // Determine flag value
@@ -355,13 +355,13 @@ namespace Ascension
                 if (squadFolderNames != null)
                 {
                     loadingForm.UpdateOutputBox($"Writing editor folder data", false);
-                    ((TagFieldBlock)scenTag.SelectField($"Block:editor folders")).RemoveAllElements();
+                    scenTag.SelectFieldType<TagFieldBlock>($"Block:editor folders").RemoveAllElements();
                     i = 0;
                     foreach (string name in squadFolderNames)
                     {
-                        ((TagFieldBlock)scenTag.SelectField($"Block:editor folders")).AddElement();
-                        ((TagFieldElementString)scenTag.SelectField($"Block:editor folders[{i}]/LongString:name")).Data = name;
-                        ((TagFieldBlockIndex)scenTag.SelectField($"Block:editor folders[{i}]/LongBlockIndex:parent folder")).Value = -1;
+                        scenTag.SelectFieldType<TagFieldBlock>($"Block:editor folders").AddElement();
+                        scenTag.SelectFieldType<TagFieldElementString>($"Block:editor folders[{i}]/LongString:name").Data = name;
+                        scenTag.SelectFieldType<TagFieldBlockIndex>($"Block:editor folders[{i}]/LongBlockIndex:parent folder").Value = -1;
                         i++;
                     }
                 }
@@ -369,52 +369,52 @@ namespace Ascension
 
                 // Now for the actual squad data
                 loadingForm.UpdateOutputBox($"Begin writing squad data", false);
-                ((TagFieldBlock)scenTag.SelectField($"Block:squads")).RemoveAllElements();
+                scenTag.SelectFieldType<TagFieldBlock>($"Block:squads").RemoveAllElements();
                 i = 0;
                 foreach (Squad squad in allSquads)
                 {
                     // Squad-level data
-                    ((TagFieldBlock)scenTag.SelectField($"Block:squads")).AddElement();
-                    ((TagFieldElementString)scenTag.SelectField($"Block:squads[{i}]/String:name")).Data = squad.Name;
-                    ((TagFieldFlags)scenTag.SelectField($"Block:squads[{i}]/Flags:flags")).RawValue = squad.Flags;
-                    ((TagFieldEnum)scenTag.SelectField($"Block:squads[{i}]/ShortEnum:team")).Value = squad.Team;
-                    ((TagFieldBlockIndex)scenTag.SelectField($"Block:squads[{i}]/ShortBlockIndex:parent")).Value = squad.ParentIndex;
-                    ((TagFieldBlockIndex)scenTag.SelectField($"Block:squads[{i}]/ShortBlockIndex:initial zone")).Value = squad.Zone;
-                    ((TagFieldBlockIndex)scenTag.SelectField($"Block:squads[{i}]/ShortBlockIndex:editor folder")).Value = squad.EditorFolder;
+                    scenTag.SelectFieldType<TagFieldBlock>($"Block:squads").AddElement();
+                    scenTag.SelectFieldType<TagFieldElementString>($"Block:squads[{i}]/String:name").Data = squad.Name;
+                    scenTag.SelectFieldType<TagFieldFlags>($"Block:squads[{i}]/Flags:flags").RawValue = squad.Flags;
+                    scenTag.SelectFieldType<TagFieldEnum>($"Block:squads[{i}]/ShortEnum:team").Value = squad.Team;
+                    scenTag.SelectFieldType<TagFieldBlockIndex>($"Block:squads[{i}]/ShortBlockIndex:parent").Value = squad.ParentIndex;
+                    scenTag.SelectFieldType<TagFieldBlockIndex>($"Block:squads[{i}]/ShortBlockIndex:initial zone").Value = squad.Zone;
+                    scenTag.SelectFieldType<TagFieldBlockIndex>($"Block:squads[{i}]/ShortBlockIndex:editor folder").Value = squad.EditorFolder;
 
                     // Fireteam-level data
-                    ((TagFieldBlock)scenTag.SelectField($"Block:squads[{i}]/Block:fire-teams")).AddElement();
-                    ((TagFieldElementInteger)scenTag.SelectField($"Block:squads[{i}]/Block:fire-teams[0]/ShortInteger:normal diff count")).Data = squad.NormalDiff;
-                    ((TagFieldEnum)scenTag.SelectField($"Block:squads[{i}]/Block:fire-teams[0]/ShortEnum:major upgrade")).Value = squad.Upgrade;
-                    ((TagFieldBlockIndex)scenTag.SelectField($"Block:squads[{i}]/Block:fire-teams[0]/ShortBlockIndex:character type")).Value = squad.CharIndex;
-                    ((TagFieldBlockIndex)scenTag.SelectField($"Block:squads[{i}]/Block:fire-teams[0]/ShortBlockIndex:initial weapon")).Value = squad.WeapIndex;
-                    ((TagFieldBlockIndex)scenTag.SelectField($"Block:squads[{i}]/Block:fire-teams[0]/ShortBlockIndex:initial secondary weapon")).Value = squad.WeapIndex2;
-                    ((TagFieldBlockIndex)scenTag.SelectField($"Block:squads[{i}]/Block:fire-teams[0]/ShortBlockIndex:vehicle type")).Value = squad.VehiIndex;
-                    ((TagFieldEnum)scenTag.SelectField($"Block:squads[{i}]/Block:fire-teams[0]/ShortEnum:grenade type")).Value = squad.Grenade;
-                    ((TagFieldElementStringID)scenTag.SelectField($"Block:squads[{i}]/Block:fire-teams[0]/StringId:vehicle variant")).Data = squad.VehiVariant;
-                    ((TagFieldElementString)scenTag.SelectField($"Block:squads[{i}]/Block:fire-teams[0]/String:Placement script")).Data = squad.PlaceScript;
+                    scenTag.SelectFieldType<TagFieldBlock>($"Block:squads[{i}]/Block:fire-teams").AddElement();
+                    scenTag.SelectFieldType<TagFieldElementInteger>($"Block:squads[{i}]/Block:fire-teams[0]/ShortInteger:normal diff count").Data = squad.NormalDiff;
+                    scenTag.SelectFieldType<TagFieldEnum>($"Block:squads[{i}]/Block:fire-teams[0]/ShortEnum:major upgrade").Value = squad.Upgrade;
+                    scenTag.SelectFieldType<TagFieldBlockIndex>($"Block:squads[{i}]/Block:fire-teams[0]/ShortBlockIndex:character type").Value = squad.CharIndex;
+                    scenTag.SelectFieldType<TagFieldBlockIndex>($"Block:squads[{i}]/Block:fire-teams[0]/ShortBlockIndex:initial weapon").Value = squad.WeapIndex;
+                    scenTag.SelectFieldType<TagFieldBlockIndex>($"Block:squads[{i}]/Block:fire-teams[0]/ShortBlockIndex:initial secondary weapon").Value = squad.WeapIndex2;
+                    scenTag.SelectFieldType<TagFieldBlockIndex>($"Block:squads[{i}]/Block:fire-teams[0]/ShortBlockIndex:vehicle type").Value = squad.VehiIndex;
+                    scenTag.SelectFieldType<TagFieldEnum>($"Block:squads[{i}]/Block:fire-teams[0]/ShortEnum:grenade type").Value = squad.Grenade;
+                    scenTag.SelectFieldType<TagFieldElementStringID>($"Block:squads[{i}]/Block:fire-teams[0]/StringId:vehicle variant").Data = squad.VehiVariant;
+                    scenTag.SelectFieldType<TagFieldElementString>($"Block:squads[{i}]/Block:fire-teams[0]/String:Placement script").Data = squad.PlaceScript;
 
                     // Starting positions
                     int j = 0;
                     foreach (StartLoc startingLoc in squad.StartingLocations)
                     {
-                        ((TagFieldBlock)scenTag.SelectField($"Block:squads[{i}]/Block:fire-teams[0]/Block:starting locations")).AddElement();
-                        ((TagFieldElementOldStringID)scenTag.SelectField($"Block:squads[{i}]/Block:fire-teams[0]/Block:starting locations[{j}]/OldStringId:name")).Data = startingLoc.Name;
-                        ((TagFieldElementArraySingle)scenTag.SelectField($"Block:squads[{i}]/Block:fire-teams[0]/Block:starting locations[{j}]/RealPoint3d:position")).Data = startingLoc.Position;
-                        ((TagFieldElementArraySingle)scenTag.SelectField($"Block:squads[{i}]/Block:fire-teams[0]/Block:starting locations[{j}]/RealEulerAngles2d:facing (yaw, pitch)")).Data = startingLoc.Facing;
-                        ((TagFieldFlags)scenTag.SelectField($"Block:squads[{i}]/Block:fire-teams[0]/Block:starting locations[{j}]/Flags:flags")).RawValue = startingLoc.Flags;
-                        ((TagFieldBlockIndex)scenTag.SelectField($"Block:squads[{i}]/Block:fire-teams[0]/Block:starting locations[{j}]/ShortBlockIndex:character type")).Value = startingLoc.CharIndex;
-                        ((TagFieldBlockIndex)scenTag.SelectField($"Block:squads[{i}]/Block:fire-teams[0]/Block:starting locations[{j}]/ShortBlockIndex:initial weapon")).Value = startingLoc.WeapIndex;
-                        ((TagFieldBlockIndex)scenTag.SelectField($"Block:squads[{i}]/Block:fire-teams[0]/Block:starting locations[{j}]/ShortBlockIndex:initial secondary weapon")).Value = startingLoc.WeapIndex2;
-                        ((TagFieldBlockIndex)scenTag.SelectField($"Block:squads[{i}]/Block:fire-teams[0]/Block:starting locations[{j}]/ShortBlockIndex:vehicle type")).Value = startingLoc.VehiIndex;
-                        ((TagFieldEnum)scenTag.SelectField($"Block:squads[{i}]/Block:fire-teams[0]/Block:starting locations[{j}]/ShortEnum:seat type")).Value = startingLoc.SeatType;
-                        ((TagFieldEnum)scenTag.SelectField($"Block:squads[{i}]/Block:fire-teams[0]/Block:starting locations[{j}]/ShortEnum:grenade type")).Value = startingLoc.Grenade;
-                        ((TagFieldElementInteger)scenTag.SelectField($"Block:squads[{i}]/Block:fire-teams[0]/Block:starting locations[{j}]/ShortInteger:swarm count")).Data = startingLoc.Swarm;
-                        ((TagFieldElementStringID)scenTag.SelectField($"Block:squads[{i}]/Block:fire-teams[0]/Block:starting locations[{j}]/StringId:actor variant name")).Data = startingLoc.ActorVar;
-                        ((TagFieldElementStringID)scenTag.SelectField($"Block:squads[{i}]/Block:fire-teams[0]/Block:starting locations[{j}]/StringId:vehicle variant name")).Data = startingLoc.VehiVar;
-                        ((TagFieldElementSingle)scenTag.SelectField($"Block:squads[{i}]/Block:fire-teams[0]/Block:starting locations[{j}]/Real:initial movement distance")).Data = startingLoc.MoveDist;
-                        ((TagFieldEnum)scenTag.SelectField($"Block:squads[{i}]/Block:fire-teams[0]/Block:starting locations[{j}]/ShortEnum:initial movement mode")).Value = startingLoc.MoveMode;
-                        ((TagFieldElementString)scenTag.SelectField($"Block:squads[{i}]/Block:fire-teams[0]/Block:starting locations[{j}]/String:Placement script")).Data = startingLoc.PlaceScript;
+                        scenTag.SelectFieldType<TagFieldBlock>($"Block:squads[{i}]/Block:fire-teams[0]/Block:starting locations").AddElement();
+                        scenTag.SelectFieldType<TagFieldElementOldStringID>($"Block:squads[{i}]/Block:fire-teams[0]/Block:starting locations[{j}]/OldStringId:name").Data = startingLoc.Name;
+                        scenTag.SelectFieldType<TagFieldElementArraySingle>($"Block:squads[{i}]/Block:fire-teams[0]/Block:starting locations[{j}]/RealPoint3d:position").Data = startingLoc.Position;
+                        scenTag.SelectFieldType<TagFieldElementArraySingle>($"Block:squads[{i}]/Block:fire-teams[0]/Block:starting locations[{j}]/RealEulerAngles2d:facing (yaw, pitch)").Data = startingLoc.Facing;
+                        scenTag.SelectFieldType<TagFieldFlags>($"Block:squads[{i}]/Block:fire-teams[0]/Block:starting locations[{j}]/Flags:flags").RawValue = startingLoc.Flags;
+                        scenTag.SelectFieldType<TagFieldBlockIndex>($"Block:squads[{i}]/Block:fire-teams[0]/Block:starting locations[{j}]/ShortBlockIndex:character type").Value = startingLoc.CharIndex;
+                        scenTag.SelectFieldType<TagFieldBlockIndex>($"Block:squads[{i}]/Block:fire-teams[0]/Block:starting locations[{j}]/ShortBlockIndex:initial weapon").Value = startingLoc.WeapIndex;
+                        scenTag.SelectFieldType<TagFieldBlockIndex>($"Block:squads[{i}]/Block:fire-teams[0]/Block:starting locations[{j}]/ShortBlockIndex:initial secondary weapon").Value = startingLoc.WeapIndex2;
+                        scenTag.SelectFieldType<TagFieldBlockIndex>($"Block:squads[{i}]/Block:fire-teams[0]/Block:starting locations[{j}]/ShortBlockIndex:vehicle type").Value = startingLoc.VehiIndex;
+                        scenTag.SelectFieldType<TagFieldEnum>($"Block:squads[{i}]/Block:fire-teams[0]/Block:starting locations[{j}]/ShortEnum:seat type").Value = startingLoc.SeatType;
+                        scenTag.SelectFieldType<TagFieldEnum>($"Block:squads[{i}]/Block:fire-teams[0]/Block:starting locations[{j}]/ShortEnum:grenade type").Value = startingLoc.Grenade;
+                        scenTag.SelectFieldType<TagFieldElementInteger>($"Block:squads[{i}]/Block:fire-teams[0]/Block:starting locations[{j}]/ShortInteger:swarm count").Data = startingLoc.Swarm;
+                        scenTag.SelectFieldType<TagFieldElementStringID>($"Block:squads[{i}]/Block:fire-teams[0]/Block:starting locations[{j}]/StringId:actor variant name").Data = startingLoc.ActorVar;
+                        scenTag.SelectFieldType<TagFieldElementStringID>($"Block:squads[{i}]/Block:fire-teams[0]/Block:starting locations[{j}]/StringId:vehicle variant name").Data = startingLoc.VehiVar;
+                        scenTag.SelectFieldType<TagFieldElementSingle>($"Block:squads[{i}]/Block:fire-teams[0]/Block:starting locations[{j}]/Real:initial movement distance").Data = startingLoc.MoveDist;
+                        scenTag.SelectFieldType<TagFieldEnum>($"Block:squads[{i}]/Block:fire-teams[0]/Block:starting locations[{j}]/ShortEnum:initial movement mode").Value = startingLoc.MoveMode;
+                        scenTag.SelectFieldType<TagFieldElementString>($"Block:squads[{i}]/Block:fire-teams[0]/Block:starting locations[{j}]/String:Placement script").Data = startingLoc.PlaceScript;
 
                         j++;
                     }

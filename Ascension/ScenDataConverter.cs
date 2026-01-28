@@ -1,13 +1,13 @@
 ﻿using Bungie;
 using Bungie.Tags;
 using System;
-using System.Numerics;
-using System.Text.RegularExpressions;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Xml;
+using System.Numerics;
+using System.Text.RegularExpressions;
 using System.Windows.Forms;
+using System.Xml;
 
 namespace Ascension
 {
@@ -708,9 +708,9 @@ namespace Ascension
                     {
                         loadingForm.UpdateOutputBox($"Adding {path} to {blockName}", false);
 
-                        int currentCount = ((TagFieldBlock)tagFile.SelectField($"Block:{blockName}")).Elements.Count();
-                        ((TagFieldBlock)tagFile.SelectField($"Block:{blockName}")).AddElement();
-                        ((TagFieldReference)tagFile.SelectField($"Block:{blockName}[{currentCount}]/Reference:{fieldName}")).Path = path;
+                        int currentCount = tagFile.SelectFieldType<TagFieldBlock>($"Block:{blockName}").Elements.Count;
+                        tagFile.SelectFieldType<TagFieldBlock>($"Block:{blockName}").AddElement();
+                        tagFile.SelectFieldType<TagFieldReference>($"Block:{blockName}[{currentCount}]/Reference:{fieldName}").Path = path;
 
                         paletteMapping.Add(itemType, currentCount);
                     }
@@ -719,30 +719,30 @@ namespace Ascension
                 void AddElementToBlock(string blockName, int index, NetEquip netgameEquipEntry, int typeIndex, int sourceType, int objectType)
                 {
                     // Position
-                    ((TagFieldElementArraySingle)tagFile.SelectField($"Block:{blockName}[{index}]/Struct:object data/RealPoint3d:position")).Data = netgameEquipEntry.Position;
+                    tagFile.SelectFieldType<TagFieldElementArraySingle>($"Block:{blockName}[{index}]/Struct:object data/RealPoint3d:position").Data = netgameEquipEntry.Position;
 
                     // Rotation
-                    ((TagFieldElementArraySingle)tagFile.SelectField($"Block:{blockName}[{index}]/Struct:object data/RealEulerAngles3d:rotation")).Data = netgameEquipEntry.Rotation;
+                    tagFile.SelectFieldType<TagFieldElementArraySingle>($"Block:{blockName}[{index}]/Struct:object data/RealEulerAngles3d:rotation").Data = netgameEquipEntry.Rotation;
 
                     // Type
-                    ((TagFieldBlockIndex)tagFile.SelectField($"Block:{blockName}[{index}]/ShortBlockIndex:type")).Value = typeIndex;
+                    tagFile.SelectFieldType<TagFieldBlockIndex>($"Block:{blockName}[{index}]/ShortBlockIndex:type").Value = typeIndex;
 
                     // Spawn timer
-                    ((TagFieldElementInteger)tagFile.SelectField($"Block:{blockName}[{index}]/Struct:multiplayer data/ShortInteger:spawn time")).Data = netgameEquipEntry.SpawnTime;
+                    tagFile.SelectFieldType<TagFieldElementInteger>($"Block:{blockName}[{index}]/Struct:multiplayer data/ShortInteger:spawn time").Data = netgameEquipEntry.SpawnTime;
 
                     // Dropdown type and source
-                    ((TagFieldEnum)tagFile.SelectField($"Block:{blockName}[{index}]/Struct:object data/Struct:object id/CharEnum:type")).Value = objectType;
-                    ((TagFieldEnum)tagFile.SelectField($"Block:{blockName}[{index}]/Struct:object data/Struct:object id/CharEnum:source")).Value = sourceType;
+                    tagFile.SelectFieldType<TagFieldEnum>($"Block:{blockName}[{index}]/Struct:object data/Struct:object id/CharEnum:type").Value = objectType;
+                    tagFile.SelectFieldType<TagFieldEnum>($"Block:{blockName}[{index}]/Struct:object data/Struct:object id/CharEnum:source").Value = sourceType;
                 }
 
                 // Object names section
-                ((TagFieldBlock)tagFile.SelectField($"Block:object names")).RemoveAllElements();
+                tagFile.SelectFieldType<TagFieldBlock>($"Block:object names").RemoveAllElements();
                 int nameIndex = 0;
                 foreach (string name in allObjectNames)
                 {
                     // Add new
-                    ((TagFieldBlock)tagFile.SelectField($"Block:object names")).AddElement();
-                    ((TagFieldElementString)tagFile.SelectField($"Block:object names[{nameIndex}]/String:name")).Data = name;
+                    tagFile.SelectFieldType<TagFieldBlock>($"Block:object names").AddElement();
+                    tagFile.SelectFieldType<TagFieldElementString>($"Block:object names[{nameIndex}]/String:name").Data = name;
 
                     nameIndex++;
                 }
@@ -753,46 +753,46 @@ namespace Ascension
                 if (scenarioType == "1,multiplayer")
                 {
                     // Spawns Section
-                    ((TagFieldBlock)tagFile.SelectField($"Block:scenery palette")).RemoveAllElements(); // Remove all scenery from palette
-                    ((TagFieldBlock)tagFile.SelectField($"Block:scenery")).RemoveAllElements(); // Remove all scenery
-                    ((TagFieldBlock)tagFile.SelectField("Block:editor folders")).RemoveAllElements(); // Remove all editor folders
+                    tagFile.SelectFieldType<TagFieldBlock>($"Block:scenery palette").RemoveAllElements(); // Remove all scenery from palette
+                    tagFile.SelectFieldType<TagFieldBlock>($"Block:scenery").RemoveAllElements(); // Remove all scenery
+                    tagFile.SelectFieldType<TagFieldBlock>("Block:editor folders").RemoveAllElements(); // Remove all editor folders
 
                     // Add editor folders
-                    ((TagFieldBlock)tagFile.SelectField("Block:editor folders")).AddElement();
-                    ((TagFieldElementLongString)tagFile.SelectField($"Block:editor folders[0]/LongString:name")).Data = "Respawn points";
-                    ((TagFieldBlock)tagFile.SelectField("Block:editor folders")).AddElement();
-                    ((TagFieldElementLongString)tagFile.SelectField($"Block:editor folders[1]/LongString:name")).Data = "Everything else";
+                    tagFile.SelectFieldType<TagFieldBlock>("Block:editor folders").AddElement();
+                    tagFile.SelectFieldType<TagFieldElementLongString>($"Block:editor folders[0]/LongString:name").Data = "Respawn points";
+                    tagFile.SelectFieldType<TagFieldBlock>("Block:editor folders").AddElement();
+                    tagFile.SelectFieldType<TagFieldElementLongString>($"Block:editor folders[1]/LongString:name").Data = "Everything else";
 
                     // Add respawn point scenery to palette
                     loadingForm.UpdateOutputBox("\nNo existing sceneries, adding respawn point\n", false);
-                    ((TagFieldBlock)tagFile.SelectField($"Block:scenery palette")).AddElement();
-                    ((TagFieldReference)tagFile.SelectField($"Block:scenery palette[0]/Reference:name")).Path = respawnScenPath;
+                    tagFile.SelectFieldType<TagFieldBlock>($"Block:scenery palette").AddElement();
+                    tagFile.SelectFieldType<TagFieldReference>($"Block:scenery palette[0]/Reference:name").Path = respawnScenPath;
 
                     // Now add the spawn points
                     int i = 0;
                     foreach (var spawn in startLocations)
                     {
-                        ((TagFieldBlock)tagFile.SelectField($"Block:scenery")).AddElement();
+                        tagFile.SelectFieldType<TagFieldBlock>($"Block:scenery").AddElement();
 
                         // Type
-                        ((TagFieldBlockIndex)tagFile.SelectField($"Block:scenery[{i}]/ShortBlockIndex:type")).Value = 0;
+                        tagFile.SelectFieldType<TagFieldBlockIndex>($"Block:scenery[{i}]/ShortBlockIndex:type").Value = 0;
 
                         // Dropdown type and source (won't be valid without these)
-                        ((TagFieldEnum)tagFile.SelectField($"Block:scenery[{i}]/Struct:object data/Struct:object id/CharEnum:type")).Value = 6; // 6 is scenery
-                        ((TagFieldEnum)tagFile.SelectField($"Block:scenery[{i}]/Struct:object data/Struct:object id/CharEnum:source")).Value = 1; // 1 is editor
+                        tagFile.SelectFieldType<TagFieldEnum>($"Block:scenery[{i}]/Struct:object data/Struct:object id/CharEnum:type").Value = 6; // 6 is scenery
+                        tagFile.SelectFieldType<TagFieldEnum>($"Block:scenery[{i}]/Struct:object data/Struct:object id/CharEnum:source").Value = 1; // 1 is editor
 
                         // Position
-                        ((TagFieldElementArraySingle)tagFile.SelectField($"Block:scenery[{i}]/Struct:object data/RealPoint3d:position")).Data = spawn.Position;
+                        tagFile.SelectFieldType<TagFieldElementArraySingle>($"Block:scenery[{i}]/Struct:object data/RealPoint3d:position").Data = spawn.Position;
 
                         // Rotation
                         float[] rotation = new float[3] { spawn.Facing, 0.0f, 0.0f };
-                        ((TagFieldElementArraySingle)tagFile.SelectField($"Block:scenery[{i}]/Struct:object data/RealEulerAngles3d:rotation")).Data = rotation;
+                        tagFile.SelectFieldType<TagFieldElementArraySingle>($"Block:scenery[{i}]/Struct:object data/RealEulerAngles3d:rotation").Data = rotation;
 
                         // Team
-                        ((TagFieldEnum)tagFile.SelectField($"Block:scenery[{i}]/Struct:multiplayer data/ShortEnum:owner team")).Value = spawn.Team;
+                        tagFile.SelectFieldType<TagFieldEnum>($"Block:scenery[{i}]/Struct:multiplayer data/ShortEnum:owner team").Value = spawn.Team;
 
                         // Editor folder
-                        ((TagFieldBlockIndex)tagFile.SelectField($"Block:scenery[{i}]/Struct:object data/ShortBlockIndex:editor folder")).Value = 0;
+                        tagFile.SelectFieldType<TagFieldBlockIndex>($"Block:scenery[{i}]/Struct:object data/ShortBlockIndex:editor folder").Value = 0;
 
                         i++;
                     }
@@ -801,14 +801,14 @@ namespace Ascension
 
                     // MP netgame equipment section
                     // First, remove all palette and entry data for equipment, vehicles, weapons and crates
-                    ((TagFieldBlock)tagFile.SelectField($"Block:equipment palette")).RemoveAllElements();
-                    ((TagFieldBlock)tagFile.SelectField($"Block:equipment")).RemoveAllElements();
-                    ((TagFieldBlock)tagFile.SelectField($"Block:vehicle palette")).RemoveAllElements();
-                    ((TagFieldBlock)tagFile.SelectField($"Block:vehicles")).RemoveAllElements();
-                    ((TagFieldBlock)tagFile.SelectField($"Block:weapon palette")).RemoveAllElements();
-                    ((TagFieldBlock)tagFile.SelectField($"Block:weapons")).RemoveAllElements();
-                    ((TagFieldBlock)tagFile.SelectField($"Block:crate palette")).RemoveAllElements();
-                    ((TagFieldBlock)tagFile.SelectField($"Block:crates")).RemoveAllElements();
+                    tagFile.SelectFieldType<TagFieldBlock>($"Block:equipment palette").RemoveAllElements();
+                    tagFile.SelectFieldType<TagFieldBlock>($"Block:equipment").RemoveAllElements();
+                    tagFile.SelectFieldType<TagFieldBlock>($"Block:vehicle palette").RemoveAllElements();
+                    tagFile.SelectFieldType<TagFieldBlock>($"Block:vehicles").RemoveAllElements();
+                    tagFile.SelectFieldType<TagFieldBlock>($"Block:weapon palette").RemoveAllElements();
+                    tagFile.SelectFieldType<TagFieldBlock>($"Block:weapons").RemoveAllElements();
+                    tagFile.SelectFieldType<TagFieldBlock>($"Block:crate palette").RemoveAllElements();
+                    tagFile.SelectFieldType<TagFieldBlock>($"Block:crates").RemoveAllElements();
 
                     Dictionary<string, int> netgamePaletteMapping = new Dictionary<string, int>();
 
@@ -826,8 +826,8 @@ namespace Ascension
 
                             AddToPaletteIfNotExists("equipment palette", "name", equipType, netgamePaletteMapping, utilsInstance.mpWeapMapping[equipType]);
 
-                            int equipCount = ((TagFieldBlock)tagFile.SelectField("Block:equipment")).Elements.Count();
-                            ((TagFieldBlock)tagFile.SelectField("Block:equipment")).AddElement();
+                            int equipCount = tagFile.SelectFieldType<TagFieldBlock>("Block:equipment").Elements.Count;
+                            tagFile.SelectFieldType<TagFieldBlock>("Block:equipment").AddElement();
                             int typeIndex = equipType != "powerup" ? netgamePaletteMapping[equipType] : netgamePaletteMapping["powerup"];
                             AddElementToBlock("equipment", equipCount, netgameEquipEntry, typeIndex, 1, 3);
 
@@ -849,8 +849,8 @@ namespace Ascension
                             {
                                 AddToPaletteIfNotExists("vehicle palette", "name", equipType, netgamePaletteMapping, utilsInstance.netVehiMapping[equipType]);
 
-                                int vehiCount = ((TagFieldBlock)tagFile.SelectField("Block:vehicles")).Elements.Count();
-                                ((TagFieldBlock)tagFile.SelectField("Block:vehicles")).AddElement();
+                                int vehiCount = tagFile.SelectFieldType<TagFieldBlock>("Block:vehicles").Elements.Count;
+                                tagFile.SelectFieldType<TagFieldBlock>("Block:vehicles").AddElement();
                                 AddElementToBlock("vehicles", vehiCount, netgameEquipEntry, netgamePaletteMapping[equipType], 1, 1);
                             }
                             catch (KeyNotFoundException)
@@ -864,8 +864,8 @@ namespace Ascension
                             {
                                 AddToPaletteIfNotExists("weapon palette", "name", equipType, netgamePaletteMapping, utilsInstance.mpWeapMapping[equipType]);
 
-                                int weapCount = ((TagFieldBlock)tagFile.SelectField("Block:weapons")).Elements.Count();
-                                ((TagFieldBlock)tagFile.SelectField("Block:weapons")).AddElement();
+                                int weapCount = tagFile.SelectFieldType<TagFieldBlock>("Block:weapons").Elements.Count();
+                                tagFile.SelectFieldType<TagFieldBlock>("Block:weapons").AddElement();
                                 AddElementToBlock("weapons", weapCount, netgameEquipEntry, netgamePaletteMapping[equipType], 1, 2);
                             }
                             catch (KeyNotFoundException)
@@ -881,7 +881,7 @@ namespace Ascension
                     {
                         // Check if current type exists in palette
                         bool typeAlreadyExists = false;
-                        foreach (var paletteEntry in ((TagFieldBlock)tagFile.SelectField("Block:scenery palette")).Elements)
+                        foreach (var paletteEntry in tagFile.SelectFieldType<TagFieldBlock>("Block:scenery palette").Elements)
                         {
                             var x = ((TagFieldReference)paletteEntry.Fields[0]).Path;
                             if (x == scenType)
@@ -894,39 +894,39 @@ namespace Ascension
                         // Add palette entry if needed
                         if (!typeAlreadyExists)
                         {
-                            int currentCount = ((TagFieldBlock)tagFile.SelectField("Block:scenery palette")).Elements.Count();
-                            ((TagFieldBlock)tagFile.SelectField("Block:scenery palette")).AddElement();
-                            ((TagFieldReference)tagFile.SelectField($"Block:scenery palette[{currentCount}]/Reference:name")).Path = scenType;
+                            int currentCount = tagFile.SelectFieldType<TagFieldBlock>("Block:scenery palette").Elements.Count;
+                            tagFile.SelectFieldType<TagFieldBlock>("Block:scenery palette").AddElement();
+                            tagFile.SelectFieldType<TagFieldReference>($"Block:scenery palette[{currentCount}]/Reference:name").Path = scenType;
                         }
                     }
 
                     // Now add all of the scenery placements
                     foreach (Scenery scenery in allScenEntries)
                     {
-                        int currentCount = ((TagFieldBlock)tagFile.SelectField("Block:scenery")).Elements.Count();
-                        ((TagFieldBlock)tagFile.SelectField("Block:scenery")).AddElement();
-                        ((TagFieldBlockIndex)tagFile.SelectField($"Block:scenery[{currentCount}]/ShortBlockIndex:type")).Value = scenery.TypeIndex + 1; // Add one to skip respawn point scenery we added to the palette earlier
+                        int currentCount = tagFile.SelectFieldType<TagFieldBlock>("Block:scenery").Elements.Count;
+                        tagFile.SelectFieldType<TagFieldBlock>("Block:scenery").AddElement();
+                        tagFile.SelectFieldType<TagFieldBlockIndex>($"Block:scenery[{currentCount}]/ShortBlockIndex:type").Value = scenery.TypeIndex + 1; // Add one to skip respawn point scenery we added to the palette earlier
 
                         // Dropdown type and source (won't be valid without these)
-                        ((TagFieldEnum)tagFile.SelectField($"Block:scenery[{currentCount}]/Struct:object data/Struct:object id/CharEnum:type")).Value = 6; // 6 is scenery
-                        ((TagFieldEnum)tagFile.SelectField($"Block:scenery[{currentCount}]/Struct:object data/Struct:object id/CharEnum:source")).Value = 1; // 1 is editor
+                        tagFile.SelectFieldType<TagFieldEnum>($"Block:scenery[{currentCount}]/Struct:object data/Struct:object id/CharEnum:type").Value = 6; // 6 is scenery
+                        tagFile.SelectFieldType<TagFieldEnum>($"Block:scenery[{currentCount}]/Struct:object data/Struct:object id/CharEnum:source").Value = 1; // 1 is editor
 
                         // Position
-                        ((TagFieldElementArraySingle)tagFile.SelectField($"Block:scenery[{currentCount}]/Struct:object data/RealPoint3d:position")).Data = scenery.Position;
+                        tagFile.SelectFieldType<TagFieldElementArraySingle>($"Block:scenery[{currentCount}]/Struct:object data/RealPoint3d:position").Data = scenery.Position;
 
                         // Rotation
-                        ((TagFieldElementArraySingle)tagFile.SelectField($"Block:scenery[{currentCount}]/Struct:object data/RealEulerAngles3d:rotation")).Data = scenery.Rotation;
+                        tagFile.SelectFieldType<TagFieldElementArraySingle>($"Block:scenery[{currentCount}]/Struct:object data/RealEulerAngles3d:rotation").Data = scenery.Rotation;
 
                         // BSP placement related stuff
-                        ((TagFieldBlockFlags)tagFile.SelectField($"Block:scenery[{currentCount}]/Struct:object data/WordBlockFlags:manual bsp flags")).Value = scenery.ManualBsp;
-                        ((TagFieldBlockIndex)tagFile.SelectField($"Block:scenery[{currentCount}]/Struct:object data/Struct:object id/ShortBlockIndex:origin bsp index")).Value = scenery.OriginBsp;
-                        ((TagFieldEnum)tagFile.SelectField($"Block:scenery[{currentCount}]/Struct:object data/CharEnum:bsp policy")).Value = scenery.BspPolicy;
+                        tagFile.SelectFieldType<TagFieldBlockFlags>($"Block:scenery[{currentCount}]/Struct:object data/WordBlockFlags:manual bsp flags").Value = scenery.ManualBsp;
+                        tagFile.SelectFieldType<TagFieldBlockIndex>($"Block:scenery[{currentCount}]/Struct:object data/Struct:object id/ShortBlockIndex:origin bsp index").Value = scenery.OriginBsp;
+                        tagFile.SelectFieldType<TagFieldEnum>($"Block:scenery[{currentCount}]/Struct:object data/CharEnum:bsp policy").Value = scenery.BspPolicy;
 
                         // Variant
-                        ((TagFieldElementStringID)tagFile.SelectField($"Block:scenery[{currentCount}]/Struct:permutation data/StringId:variant name")).Data = scenery.VarName;
+                        tagFile.SelectFieldType<TagFieldElementStringID>($"Block:scenery[{currentCount}]/Struct:permutation data/StringId:variant name").Data = scenery.VarName;
 
                         // Editor folder
-                        ((TagFieldBlockIndex)tagFile.SelectField($"Block:scenery[{currentCount}]/Struct:object data/ShortBlockIndex:editor folder")).Value = 1;
+                        tagFile.SelectFieldType<TagFieldBlockIndex>($"Block:scenery[{currentCount}]/Struct:object data/ShortBlockIndex:editor folder").Value = 1;
                     }
 
                     loadingForm.UpdateOutputBox($"Finished writing scenery data to scenario tag!", false);
@@ -934,34 +934,26 @@ namespace Ascension
                     // Crates section
 
                     // Begin with creating the editor folders
-                    ((TagFieldBlock)tagFile.SelectField("Block:crates")).RemoveAllElements(); // Remove all crates
-                    ((TagFieldBlock)tagFile.SelectField("Block:crate palette")).RemoveAllElements(); // Remove all crate types from palette
+                    tagFile.SelectFieldType<TagFieldBlock>("Block:crates").RemoveAllElements(); // Remove all crates
+                    tagFile.SelectFieldType<TagFieldBlock>("Block:crate palette").RemoveAllElements(); // Remove all crate types from palette
+
                     for (int z = 0; z < 5; z++)
                     {
-                        int currentCount = ((TagFieldBlock)tagFile.SelectField("Block:editor folders")).Elements.Count();
-                        ((TagFieldBlock)tagFile.SelectField("Block:editor folders")).AddElement();
+                        int currentCount = tagFile.SelectFieldType<TagFieldBlock>("Block:editor folders").Elements.Count;
+                        tagFile.SelectFieldType<TagFieldBlock>("Block:editor folders").AddElement();
+
                         // Name
-                        var name = (TagFieldElementLongString)tagFile.SelectField($"Block:editor folders[{currentCount}]/LongString:name");
-                        if (z == 0)
+                        var name = tagFile.SelectFieldType<TagFieldElementLongString>($"Block:editor folders[{currentCount}]/LongString:name");
+
+                        name.Data = z switch
                         {
-                            name.Data = "oddball";
-                        }
-                        else if (z == 1)
-                        {
-                            name.Data = "ctf";
-                        }
-                        else if (z == 2)
-                        {
-                            name.Data = "koth";
-                        }
-                        else if (z == 3)
-                        {
-                            name.Data = "assault";
-                        }
-                        else if (z == 4)
-                        {
-                            name.Data = "territories";
-                        }
+                            0 => "oddball",
+                            1 => "ctf",
+                            2 => "koth",
+                            3 => "assault",
+                            4 => "territories",
+                            _ => string.Empty,
+                        };
                     }
 
                     // Crate palette - same as scenery, we are just giving invalid refs to be changed when objects have been ported
@@ -969,7 +961,7 @@ namespace Ascension
                     {
                         // Check if current type exists in palette
                         bool typeAlreadyExists = false;
-                        foreach (var paletteEntry in ((TagFieldBlock)tagFile.SelectField("Block:crate palette")).Elements)
+                        foreach (var paletteEntry in tagFile.SelectFieldType<TagFieldBlock>("Block:crate palette").Elements)
                         {
                             var x = ((TagFieldReference)paletteEntry.Fields[0]).Path;
                             if (x == crateType)
@@ -982,38 +974,40 @@ namespace Ascension
                         // Add palette entry if needed
                         if (!typeAlreadyExists)
                         {
-                            int currentCount = ((TagFieldBlock)tagFile.SelectField("Block:crate palette")).Elements.Count();
-                            ((TagFieldBlock)tagFile.SelectField("Block:crate palette")).AddElement();
-                            ((TagFieldReference)tagFile.SelectField($"Block:crate palette[{currentCount}]/Reference:name")).Path = crateType;
+                            int currentCount = tagFile.SelectFieldType<TagFieldBlock>("Block:crate palette").Elements.Count;
+
+                            tagFile.SelectFieldType<TagFieldBlock>("Block:crate palette").AddElement();
+                            tagFile.SelectFieldType<TagFieldReference>($"Block:crate palette[{currentCount}]/Reference:name").Path = crateType;
                         }
                     }
 
                     foreach (Crate crate in allCrateEntries)
                     {
-                        int currentCount = ((TagFieldBlock)tagFile.SelectField("Block:crates")).Elements.Count();
-                        ((TagFieldBlock)tagFile.SelectField("Block:crates")).AddElement();
-                        ((TagFieldBlockIndex)tagFile.SelectField($"Block:crates[{currentCount}]/ShortBlockIndex:type")).Value = crate.TypeIndex;
+                        int currentCount = tagFile.SelectFieldType<TagFieldBlock>("Block:crates").Elements.Count;
+
+                        tagFile.SelectFieldType<TagFieldBlock>("Block:crates").AddElement();
+                        tagFile.SelectFieldType<TagFieldBlockIndex>($"Block:crates[{currentCount}]/ShortBlockIndex:type").Value = crate.TypeIndex;
 
                         // Name
-                        ((TagFieldBlockIndex)tagFile.SelectField($"Block:crates[{currentCount}]/ShortBlockIndex:name")).Value = crate.NameIndex;
+                        tagFile.SelectFieldType<TagFieldBlockIndex>($"Block:crates[{currentCount}]/ShortBlockIndex:name").Value = crate.NameIndex;
 
                         // Dropdown type and source (won't be valid without these)
-                        ((TagFieldEnum)tagFile.SelectField($"Block:crates[{currentCount}]/Struct:object data/Struct:object id/CharEnum:type")).Value = 10; // 10 is crate
-                        ((TagFieldEnum)tagFile.SelectField($"Block:crates[{currentCount}]/Struct:object data/Struct:object id/CharEnum:source")).Value = 1; // 1 is editor
+                        tagFile.SelectFieldType<TagFieldEnum>($"Block:crates[{currentCount}]/Struct:object data/Struct:object id/CharEnum:type").Value = 10; // 10 is crate
+                        tagFile.SelectFieldType<TagFieldEnum>($"Block:crates[{currentCount}]/Struct:object data/Struct:object id/CharEnum:source").Value = 1; // 1 is editor
 
                         // Position
-                        ((TagFieldElementArraySingle)tagFile.SelectField($"Block:crates[{currentCount}]/Struct:object data/RealPoint3d:position")).Data = crate.Position;
+                        tagFile.SelectFieldType<TagFieldElementArraySingle>($"Block:crates[{currentCount}]/Struct:object data/RealPoint3d:position").Data = crate.Position;
 
                         // Rotation
-                        ((TagFieldElementArraySingle)tagFile.SelectField($"Block:crates[{currentCount}]/Struct:object data/RealEulerAngles3d:rotation")).Data = crate.Rotation;
+                        tagFile.SelectFieldType<TagFieldElementArraySingle>($"Block:crates[{currentCount}]/Struct:object data/RealEulerAngles3d:rotation").Data = crate.Rotation;
 
                         // BSP placement related stuff
-                        ((TagFieldBlockFlags)tagFile.SelectField($"Block:crates[{currentCount}]/Struct:object data/WordBlockFlags:manual bsp flags")).Value = crate.ManualBsp;
-                        ((TagFieldBlockIndex)tagFile.SelectField($"Block:crates[{currentCount}]/Struct:object data/Struct:object id/ShortBlockIndex:origin bsp index")).Value = crate.OriginBsp;
-                        ((TagFieldEnum)tagFile.SelectField($"Block:crates[{currentCount}]/Struct:object data/CharEnum:bsp policy")).Value = crate.BspPolicy;
+                        tagFile.SelectFieldType<TagFieldBlockFlags>($"Block:crates[{currentCount}]/Struct:object data/WordBlockFlags:manual bsp flags").Value = crate.ManualBsp;
+                        tagFile.SelectFieldType<TagFieldBlockIndex>($"Block:crates[{currentCount}]/Struct:object data/Struct:object id/ShortBlockIndex:origin bsp index").Value = crate.OriginBsp;
+                        tagFile.SelectFieldType<TagFieldEnum>($"Block:crates[{currentCount}]/Struct:object data/CharEnum:bsp policy").Value = crate.BspPolicy;
 
                         // Variant
-                        ((TagFieldElementStringID)tagFile.SelectField($"Block:crates[{currentCount}]/Struct:permutation data/StringId:variant name")).Data = crate.VarName;
+                        tagFile.SelectFieldType<TagFieldElementStringID>($"Block:crates[{currentCount}]/Struct:permutation data/StringId:variant name").Data = crate.VarName;
                     }
 
                     Dictionary<string, int> existingGametypeCrates = new Dictionary<string, int>();
@@ -1028,9 +1022,10 @@ namespace Ascension
                         if (!existingGametypeCrates.ContainsKey(strippedName))
                         {
                             // Add type to crate palette
-                            currentCount = ((TagFieldBlock)tagFile.SelectField("Block:crate palette")).Elements.Count();
-                            ((TagFieldBlock)tagFile.SelectField("Block:crate palette")).AddElement();
-                            ((TagFieldReference)tagFile.SelectField($"Block:crate palette[{currentCount}]/Reference:name")).Path = utilsInstance.netflagMapping[netflag.Type];
+                            currentCount = tagFile.SelectFieldType<TagFieldBlock>("Block:crate palette").Elements.Count;
+
+                            tagFile.SelectFieldType<TagFieldBlock>("Block:crate palette").AddElement();
+                            tagFile.SelectFieldType<TagFieldReference>($"Block:crate palette[{currentCount}]/Reference:name").Path = utilsInstance.netflagMapping[netflag.Type];
                             existingGametypeCrates.Add(strippedName, currentCount);
                         }
                         else
@@ -1038,42 +1033,43 @@ namespace Ascension
                             currentCount = existingGametypeCrates[strippedName];
                         }
 
-                        currentCount = ((TagFieldBlock)tagFile.SelectField("Block:crates")).Elements.Count(); // Get current crate count
-                        ((TagFieldBlock)tagFile.SelectField("Block:crates")).AddElement();
-                        ((TagFieldBlockIndex)tagFile.SelectField($"Block:crates[{currentCount}]/ShortBlockIndex:type")).Value = existingGametypeCrates[strippedName];
+                        currentCount = tagFile.SelectFieldType<TagFieldBlock>("Block:crates").Elements.Count; // Get current crate count
+
+                        tagFile.SelectFieldType<TagFieldBlock>("Block:crates").AddElement();
+                        tagFile.SelectFieldType<TagFieldBlockIndex>($"Block:crates[{currentCount}]/ShortBlockIndex:type").Value = existingGametypeCrates[strippedName];
 
                         // Name
-                        ((TagFieldBlockIndex)tagFile.SelectField($"Block:crates[{currentCount}]/ShortBlockIndex:name")).Value = allObjectNames.IndexOf(netflag.Name);
+                        tagFile.SelectFieldType<TagFieldBlockIndex>($"Block:crates[{currentCount}]/ShortBlockIndex:name").Value = allObjectNames.IndexOf(netflag.Name);
 
                         // Dropdown type and source (won't be valid without these)
-                        ((TagFieldEnum)tagFile.SelectField($"Block:crates[{currentCount}]/Struct:object data/Struct:object id/CharEnum:type")).Value = 10; // 10 is crate
-                        ((TagFieldEnum)tagFile.SelectField($"Block:crates[{currentCount}]/Struct:object data/Struct:object id/CharEnum:source")).Value = 1; // 1 is editor
+                        tagFile.SelectFieldType<TagFieldEnum>($"Block:crates[{currentCount}]/Struct:object data/Struct:object id/CharEnum:type").Value = 10; // 10 is crate
+                        tagFile.SelectFieldType<TagFieldEnum>($"Block:crates[{currentCount}]/Struct:object data/Struct:object id/CharEnum:source").Value = 1; // 1 is editor
 
                         // Position
-                        ((TagFieldElementArraySingle)tagFile.SelectField($"Block:crates[{currentCount}]/Struct:object data/RealPoint3d:position")).Data = netflag.Position;
+                        tagFile.SelectFieldType<TagFieldElementArraySingle>($"Block:crates[{currentCount}]/Struct:object data/RealPoint3d:position").Data = netflag.Position;
 
                         // Rotation
                         float[] rotation = new float[3] { netflag.Facing, 0.0f, 0.0f };
-                        ((TagFieldElementArraySingle)tagFile.SelectField($"Block:crates[{currentCount}]/Struct:object data/RealEulerAngles3d:rotation")).Data = rotation;
+                        tagFile.SelectFieldType<TagFieldElementArraySingle>($"Block:crates[{currentCount}]/Struct:object data/RealEulerAngles3d:rotation").Data = rotation;
 
                         // Team - always set neutral for koth or they don't spawn
-                        if (strippedName.ToLower().Contains("hill"))
+                        if (strippedName.Contains("hill", StringComparison.CurrentCultureIgnoreCase))
                         {
-                            ((TagFieldEnum)tagFile.SelectField($"Block:crates[{currentCount}]/Struct:multiplayer data/ShortEnum:owner team")).Value = 8;
+                            tagFile.SelectFieldType<TagFieldEnum>($"Block:crates[{currentCount}]/Struct:multiplayer data/ShortEnum:owner team").Value = 8;
                         }
                         else
                         {
-                            ((TagFieldEnum)tagFile.SelectField($"Block:crates[{currentCount}]/Struct:multiplayer data/ShortEnum:owner team")).Value = netflag.Team;
+                            tagFile.SelectFieldType<TagFieldEnum>($"Block:crates[{currentCount}]/Struct:multiplayer data/ShortEnum:owner team").Value = netflag.Team;
                         }
 
                         // Spawn order (identifier)
-                        ((TagFieldElementInteger)tagFile.SelectField($"Block:crates[{currentCount}]/Struct:multiplayer data/CharInteger:spawn order")).Data = netflag.SpawnOrder;
+                        tagFile.SelectFieldType<TagFieldElementInteger>($"Block:crates[{currentCount}]/Struct:multiplayer data/CharInteger:spawn order").Data = netflag.SpawnOrder;
 
                         // Grab editor folder
-                        var editorFolder = ((TagFieldBlockIndex)tagFile.SelectField($"Block:crates[{currentCount}]/Struct:object data/ShortBlockIndex:editor folder"));
+                        var editorFolder = tagFile.SelectFieldType<TagFieldBlockIndex>($"Block:crates[{currentCount}]/Struct:object data/ShortBlockIndex:editor folder");
 
                         // Grab gametype flag field
-                        var gametypeFlag = ((TagFieldFlags)tagFile.SelectField($"Block:crates[{currentCount}]/Struct:multiplayer data/WordFlags:game engine flags"));
+                        var gametypeFlag = tagFile.SelectFieldType<TagFieldFlags>($"Block:crates[{currentCount}]/Struct:multiplayer data/WordFlags:game engine flags");
 
                         // Choose folder and gametype flag based on type
                         if (strippedName.ToLower().Contains("oddball"))
@@ -1118,48 +1114,51 @@ namespace Ascension
                 }
 
                 // Trigger volumes section
-                ((TagFieldBlock)tagFile.SelectField($"Block:trigger volumes")).RemoveAllElements();
+                tagFile.SelectFieldType<TagFieldBlock>($"Block:trigger volumes").RemoveAllElements();
                 foreach (TrigVol vol in allTrigVols)
                 {
-                    int currentCount = ((TagFieldBlock)tagFile.SelectField($"Block:trigger volumes")).Elements.Count();
-                    ((TagFieldBlock)tagFile.SelectField($"Block:trigger volumes")).AddElement();
+                    int currentCount = tagFile.SelectFieldType<TagFieldBlock>($"Block:trigger volumes").Elements.Count;
+
+                    tagFile.SelectFieldType<TagFieldBlock>($"Block:trigger volumes").AddElement();
 
                     // Name
-                    ((TagFieldElementStringID)tagFile.SelectField($"Block:trigger volumes[{currentCount}]/StringId:name")).Data = vol.Name;
+                    tagFile.SelectFieldType<TagFieldElementStringID>($"Block:trigger volumes[{currentCount}]/StringId:name").Data = vol.Name;
 
                     // Forward
-                    ((TagFieldElementArraySingle)tagFile.SelectField($"Block:trigger volumes[{currentCount}]/RealVector3d:forward")).Data = vol.Forward;
+                    tagFile.SelectFieldType<TagFieldElementArraySingle>($"Block:trigger volumes[{currentCount}]/RealVector3d:forward").Data = vol.Forward;
 
                     // Up
-                    ((TagFieldElementArraySingle)tagFile.SelectField($"Block:trigger volumes[{currentCount}]/RealVector3d:up")).Data = vol.Up;
+                    tagFile.SelectFieldType<TagFieldElementArraySingle>($"Block:trigger volumes[{currentCount}]/RealVector3d:up").Data = vol.Up;
 
                     // Position
-                    ((TagFieldElementArraySingle)tagFile.SelectField($"Block:trigger volumes[{currentCount}]/RealPoint3d:position")).Data = vol.Position;
+                    tagFile.SelectFieldType<TagFieldElementArraySingle>($"Block:trigger volumes[{currentCount}]/RealPoint3d:position").Data = vol.Position;
 
                     // Extents
-                    ((TagFieldElementArraySingle)tagFile.SelectField($"Block:trigger volumes[{currentCount}]/RealPoint3d:extents")).Data = vol.Extents;
+                    tagFile.SelectFieldType<TagFieldElementArraySingle>($"Block:trigger volumes[{currentCount}]/RealPoint3d:extents").Data = vol.Extents;
                 }
 
                 loadingForm.UpdateOutputBox($"Finished writing trigger volume data to scenario tag!", false);
 
                 // Decals section
-                ((TagFieldBlock)tagFile.SelectField($"Block:decal palette")).RemoveAllElements(); // Remove all decals from palette
-                ((TagFieldBlock)tagFile.SelectField($"Block:decals")).RemoveAllElements(); // Remove all decals
+                tagFile.SelectFieldType<TagFieldBlock>($"Block:decal palette").RemoveAllElements(); // Remove all decals from palette
+                tagFile.SelectFieldType<TagFieldBlock>($"Block:decals").RemoveAllElements(); // Remove all decals
                 foreach (TagPath decalType in allDecalTypes)
                 {
-                    int currentCount = ((TagFieldBlock)tagFile.SelectField($"Block:decal palette")).Elements.Count();
-                    ((TagFieldBlock)tagFile.SelectField($"Block:decal palette")).AddElement();
-                    ((TagFieldReference)tagFile.SelectField($"Block:decal palette[{currentCount}]/Reference:reference")).Path = decalType;
+                    int currentCount = tagFile.SelectFieldType<TagFieldBlock>($"Block:decal palette").Elements.Count;
+
+                    tagFile.SelectFieldType<TagFieldBlock>($"Block:decal palette").AddElement();
+                    tagFile.SelectFieldType<TagFieldReference>($"Block:decal palette[{currentCount}]/Reference:reference").Path = decalType;
                 }
 
                 foreach (Decal decalEntry in allDecalEntries)
                 {
-                    int currentCount = ((TagFieldBlock)tagFile.SelectField($"Block:decals")).Elements.Count();
-                    ((TagFieldBlock)tagFile.SelectField($"Block:decals")).AddElement();
-                    ((TagFieldBlockIndex)tagFile.SelectField($"Block:decals[{currentCount}]/ShortBlockIndex:decal palette index")).Value = int.Parse(decalEntry.Type);
+                    int currentCount = tagFile.SelectFieldType<TagFieldBlock>($"Block:decals").Elements.Count;
+
+                    tagFile.SelectFieldType<TagFieldBlock>($"Block:decals").AddElement();
+                    tagFile.SelectFieldType<TagFieldBlockIndex>($"Block:decals[{currentCount}]/ShortBlockIndex:decal palette index").Value = int.Parse(decalEntry.Type);
 
                     // Position
-                    ((TagFieldElementArraySingle)tagFile.SelectField($"Block:decals[{currentCount}]/RealPoint3d:position")).Data = decalEntry.Position;
+                    tagFile.SelectFieldType<TagFieldElementArraySingle>($"Block:decals[{currentCount}]/RealPoint3d:position").Data = decalEntry.Position;
 
                     // Rotation stuff below - only god fucking knows what this is doing, and either way it doesnt work properly
                     double pitchDegrees = double.Parse(decalEntry.Pitch);
@@ -1181,7 +1180,7 @@ namespace Ascension
                     );
 
                     string quaternionString = $"{finalRotation.X},{finalRotation.Y},{finalRotation.Z},{finalRotation.W}";
-                    ((TagFieldElementArraySingle)tagFile.SelectField($"Block:decals[{currentCount}]/RealQuaternion:rotation")).Data = quaternionString.Split(',').Select(valueString => float.TryParse(valueString, out float floatValue) ? floatValue : float.NaN).ToArray();
+                    tagFile.SelectFieldType<TagFieldElementArraySingle>($"Block:decals[{currentCount}]/RealQuaternion:rotation").Data = quaternionString.Split(',').Select(valueString => float.TryParse(valueString, out float floatValue) ? floatValue : float.NaN).ToArray();
                 }
 
                 loadingForm.UpdateOutputBox($"Finished writing decal data to scenario tag!", false);
@@ -1192,14 +1191,14 @@ namespace Ascension
                 // Device controls section
                 Utils.WriteObjectData(tagFile, allControlEntries, "controls", loadingForm);
 
-                ((TagFieldBlock)tagFile.SelectField($"Block:device groups")).RemoveAllElements();
+                tagFile.SelectFieldType<TagFieldBlock>($"Block:device groups").RemoveAllElements();
                 int groupIndex = 0;
                 foreach (DeviceGroup deviceGroupEntry in allDeviceGroups)
                 {
-                    ((TagFieldBlock)tagFile.SelectField($"Block:device groups")).AddElement();
-                    ((TagFieldElementString)tagFile.SelectField($"Block:device groups[{groupIndex}]/String:name")).Data = deviceGroupEntry.Name;
-                    ((TagFieldElementSingle)tagFile.SelectField($"Block:device groups[{groupIndex}]/Real:initial value")).Data = deviceGroupEntry.InitVal;
-                    ((TagFieldFlags)tagFile.SelectField($"Block:device groups[{groupIndex}]/Flags:flags")).RawValue = deviceGroupEntry.Flags;
+                    tagFile.SelectFieldType<TagFieldBlock>($"Block:device groups").AddElement();
+                    tagFile.SelectFieldType<TagFieldElementString>($"Block:device groups[{groupIndex}]/String:name").Data = deviceGroupEntry.Name;
+                    tagFile.SelectFieldType<TagFieldElementSingle>($"Block:device groups[{groupIndex}]/Real:initial value").Data = deviceGroupEntry.InitVal;
+                    tagFile.SelectFieldType<TagFieldFlags>($"Block:device groups[{groupIndex}]/Flags:flags").RawValue = deviceGroupEntry.Flags;
                     groupIndex++;
                 }
 
